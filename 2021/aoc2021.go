@@ -73,6 +73,22 @@ func setunion(a, b []byte) []byte {
 	return res
 }
 
+func max(x, y int) int {
+	if x < y {
+		return y
+	} else {
+		return x
+	}
+}
+
+func min(x, y int) int {
+	if x < y {
+		return x
+	} else {
+		return y
+	}
+}
+
 func Day1(part2 bool) int {
 	buf := Readfile("day1.txt")
 	// buf = []string{"199",
@@ -808,4 +824,97 @@ func Day10(part2 bool) int {
 	} else {
 		return err
 	}
+}
+
+func Day11(part2 bool) int {
+	buf := strings.Split(`5483143223
+2745854711
+5264556173
+6141336146
+6357385478
+4167524645
+2176841721
+6882881134
+4846848554
+5283751526`, "\n")
+	/*
+	   	buf = strings.Split(`11111
+	   19991
+	   19191
+	   19991
+	   11111`, "\n")
+	*/
+	buf = Readfile("day11.txt")
+	height := len(buf)
+	width := len(buf[0])
+	type octo struct {
+		energy uint8
+		flash  bool
+	}
+	p := make([][]octo, height)
+	for i, s := range buf {
+		x := make([]octo, width)
+		for j, c := range s {
+			n, _ := strconv.Atoi(string(c))
+			x[j] = octo{uint8(n), false}
+		}
+		p[i] = x
+	}
+	// main loop
+	var boost func([][]octo, int, int)
+	boost_neighbours := func(p [][]octo, i, j int) {
+		x1 := max(0, i-1)
+		x2 := min(height-1, i+1)
+		y1 := max(0, j-1)
+		y2 := min(width-1, j+1)
+		for x := x1; x <= x2; x++ {
+			for y := y1; y <= y2; y++ {
+				boost(p, x, y)
+			}
+		}
+	}
+	boost = func(p [][]octo, i, j int) {
+		p[i][j].energy++
+		if p[i][j].energy > 9 && !p[i][j].flash {
+			p[i][j].flash = true
+			boost_neighbours(p, i, j)
+		}
+	}
+	res := 0
+	limit := 100
+	// update and flag flashers
+	if part2 {
+		limit = 1e6
+	}
+	for step := 0; step < limit; step++ {
+		for i := 0; i < height; i++ {
+			for j := 0; j < width; j++ {
+				boost(p, i, j)
+			}
+		}
+		if part2 {
+			res = 0
+		}
+		// reset flashers
+		for i := 0; i < height; i++ {
+			for j := 0; j < width; j++ {
+				if p[i][j].flash {
+					res++
+					p[i][j].energy = 0
+					p[i][j].flash = false
+				}
+			}
+		}
+		if part2 {
+			if res == height*width {
+				return step + 1
+			}
+		}
+	}
+	return res
+}
+
+func Day12(part2 bool) int {
+	// buf = Readfile("day12.txt")
+	return 0
 }

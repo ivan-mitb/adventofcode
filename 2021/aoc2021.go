@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -19,6 +20,57 @@ func Readfile(fn string) (buf []string) {
 	}
 	f.Close()
 	return
+}
+
+func setdiff(a, b []byte) (res []byte) {
+	i, j := 0, 0
+	for i < len(a) && j < len(b) {
+		if a[i] == b[j] {
+			i++
+			j++
+			continue
+		}
+		if a[i] < b[j] {
+			res = append(res, a[i])
+			i++
+			continue
+		}
+		if a[i] >= b[j] {
+			j++
+		}
+	}
+	if i < len(a) {
+		res = append(res, a[i:]...)
+	}
+	return res
+}
+
+func setunion(a, b []byte) []byte {
+	res := []byte{}
+	i, j := 0, 0
+	for {
+		if i < len(a) && j < len(b) {
+			if a[i] == b[j] {
+				res = append(res, a[i])
+				i++
+				j++
+			} else if a[i] < b[j] {
+				res = append(res, a[i])
+				i++
+			} else {
+				res = append(res, b[j])
+				j++
+			}
+		} else {
+			if i < len(a) {
+				res = append(res, a[i:]...)
+			} else if j < len(b) {
+				res = append(res, b[j:]...)
+			}
+			break
+		}
+	}
+	return res
 }
 
 func Day1(part2 bool) int {
@@ -446,4 +498,123 @@ func Day7(part2 bool) int {
 		}
 	}
 	return minfuel
+}
+
+func Day8(part2 bool) int {
+	buf := Readfile("day8.txt")
+	// `acedgfb cdfbe gcdfa fbcad dab cefabd cdfgeb eafb cagedb ab | cdfeb fcadb cdfeb cdbaf`
+	// buf := strings.Split(
+	// 	`be cfbegad cbdgef fgaecd cgeb fdcge agebfd fecdb fabcd edb | fdgacbe cefdb cefbgd gcbe
+	// edbfga begcd cbg gc gcadebf fbgde acbgfd abcde gfcbed gfec | fcgedb cgb dgebacf gc
+	// fgaebd cg bdaec gdafb agbcfd gdcbef bgcad gfac gcb cdgabef | cg cg fdcagb cbg
+	// fbegcd cbd adcefb dageb afcb bc aefdc ecdab fgdeca fcdbega | efabcd cedba gadfec cb
+	// aecbfdg fbg gf bafeg dbefa fcge gcbea fcaegb dgceab fcbdga | gecf egdcabf bgf bfgea
+	// fgeab ca afcebg bdacfeg cfaedg gcfdb baec bfadeg bafgc acf | gebdcfa ecba ca fadegcb
+	// dbcfg fgd bdegcaf fgec aegbdf ecdfab fbedc dacgb gdcebf gf | cefg dcbef fcge gbcadfe
+	// bdfegc cbegaf gecbf dfcage bdacg ed bedf ced adcbefg gebcd | ed bcgafe cdgba cbgef
+	// egadfb cdbfeg cegd fecab cgb gbdefca cg fgcdab egfdb bfceg | gbdfcae bgc cg cgb
+	// gcafb gcf dcaebfg ecagb gf abcdeg gaef cafbge fdbac fegbdc | fgae cfgab fg bagce`, "\n")
+	output := make([]string, len(buf))
+	signal := make([]string, len(buf))
+	for i, s := range buf {
+		s := strings.Split(s, " | ")
+		signal[i] = s[0]
+		output[i] = s[1]
+	}
+	res := 0
+	if !part2 {
+		for i := range output {
+			s := strings.Fields(output[i])
+			for _, j := range s {
+				l := len(j)
+				if l == 2 || l == 3 || l == 4 || l == 7 {
+					res++
+				}
+			}
+		}
+	} else {
+		// assume the lists are sorted
+		matchdigit := func(digits [][]byte, s []byte) byte {
+			for i := range digits {
+				if string(s) == string(digits[i]) {
+					return byte('0' + i)
+				}
+			}
+			return 0
+		}
+		// unscramble and decode the signal into the 4-digit value
+		decode := func(signal, output string) int {
+			s := strings.Fields(signal)
+			sort.Slice(s, func(i, j int) bool { return len(s[i]) < len(s[j]) })
+			digits := make([][]byte, 10)
+			savedigit := func(s []byte, i int) {
+				digits[i] = make([]byte, len(s))
+				copy(digits[i], s)
+			}
+			res := make([]byte, 4)
+			a := []byte{}
+			cf := []byte{}
+			bd := []byte{}
+			for _, x := range s {
+				j := []byte(x)
+				sort.Slice(j, func(a, b int) bool { return j[a] < j[b] })
+				switch len(j) {
+				case 2: // '1'
+					savedigit(j, 1)
+					cf = j
+				case 3: // '7'
+					savedigit(j, 7)
+					a = setdiff(j, cf)
+				case 4: // '4'
+					savedigit(j, 4)
+					bd = setdiff(j, cf)
+				case 5: // '235'
+					abdcf := setunion(a, setunion(bd, cf))
+					x := setdiff(j, abdcf)
+					if len(x) == 1 {
+						// g = x
+						if len(setdiff(cf, j)) == 1 {
+							// '5'
+							savedigit(j, 5)
+						} else {
+							// '3'
+							savedigit(j, 3)
+						}
+					} else if len(x) == 2 {
+						// '2'
+						savedigit(j, 2)
+					}
+				case 6: // '0' 6 9
+					if len(setdiff(bd, j)) > 0 {
+						savedigit(j, 0)
+					} else {
+						if len(setdiff(cf, j)) == 1 {
+							savedigit(j, 6)
+						} else {
+							savedigit(j, 9)
+						}
+					}
+				case 7:
+					savedigit(j, 8)
+				}
+			}
+			for i, s := range strings.Fields(output) {
+				s := []byte(s)
+				sort.Slice(s, func(a, b int) bool { return s[a] < s[b] })
+				res[i] = matchdigit(digits, s)
+			}
+			n, _ := strconv.Atoi(string(res))
+			return n
+		}
+		for i := range buf {
+			n := decode(signal[i], output[i])
+			res += n
+		}
+	}
+	return res
+}
+
+func Day9(part2 bool) int {
+	// buf := Readfile("day9.txt")
+	return 0
 }

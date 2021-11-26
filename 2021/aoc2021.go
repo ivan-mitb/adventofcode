@@ -615,6 +615,126 @@ func Day8(part2 bool) int {
 }
 
 func Day9(part2 bool) int {
-	// buf := Readfile("day9.txt")
+	buf := Readfile("day9.txt")
+	// 	buf := strings.Split(`2199943210
+	// 3987894921
+	// 9856789892
+	// 8767896789
+	// 9899965678`, "\n")
+	res := 0
+	height := len(buf)
+	width := len(buf[0])
+	a := make([][]uint8, height)
+	type point struct {
+		x, y       int
+		size       int
+		neighbours []*point
+	}
+	lowpoints := []point{}
+	neighbours := func(a [][]uint8, p *point) (res []uint8) {
+		i, j := p.x, p.y
+		nb := []*point{}
+		if i > 0 {
+			nb = append(nb, &point{i - 1, j, 0, nil})
+			res = append(res, a[i-1][j])
+		}
+		if i < height-1 {
+			nb = append(nb, &point{i + 1, j, 0, nil})
+			res = append(res, a[i+1][j])
+		}
+		if j > 0 {
+			nb = append(nb, &point{i, j - 1, 0, nil})
+			res = append(res, a[i][j-1])
+		}
+		if j < width-1 {
+			nb = append(nb, &point{i, j + 1, 0, nil})
+			res = append(res, a[i][j+1])
+		}
+		p.neighbours = nb
+		return res
+	}
+	islowpoint := func(a [][]uint8, p *point) bool {
+		i, j := p.x, p.y
+		h := a[i][j]
+		for _, x := range neighbours(a, p) {
+			if h >= x {
+				return false
+			}
+		}
+		return true
+	}
+	in := func(y []point, x point) bool {
+		for _, i := range y {
+			if x.x == i.x && x.y == i.y {
+				return true
+			}
+		}
+		return false
+	}
+	// debug := func(lp []point) {
+	// 	for _, p := range lp {
+	// 		fmt.Printf("%d,%d -> ", p.x, p.y)
+	// 		for _, p := range p.neighbours {
+	// 			fmt.Printf("%d,%d ", p.x, p.y)
+	// 		}
+	// 		println()
+	// 	}
+	// }
+	// returns size of basin around p
+	basin := func(a [][]uint8, p point) int {
+		q := []point{p}
+		visited := []point{}
+		for len(q) > 0 {
+			p := q[0]
+			q = q[1:]
+			if in(visited, p) {
+				continue
+			}
+			visited = append(visited, p)
+			neighbours(a, &p)
+			for _, n := range p.neighbours {
+				if a[n.x][n.y] < 9 && !in(visited, *n) {
+					q = append(q, *n)
+				}
+			}
+		}
+		// debug(visited)
+		return len(visited)
+	}
+	// find lowpoints
+	for i := range buf {
+		d := make([]uint8, width)
+		a[i] = d
+		for j := range buf[i] {
+			n, _ := strconv.Atoi(string(buf[i][j]))
+			d[j] = uint8(n)
+		}
+	}
+
+	for i := 0; i < height; i++ {
+		for j := 0; j < width; j++ {
+			p := point{i, j, 0, nil}
+			if islowpoint(a, &p) {
+				lowpoints = append(lowpoints, p)
+				res += int(a[i][j] + 1)
+			}
+		}
+	}
+	if !part2 {
+		return res
+	} else {
+		for i := range lowpoints {
+			size := basin(a, lowpoints[i])
+			lowpoints[i].size = size
+		}
+		// sort descending
+		sort.Slice(lowpoints, func(i, j int) bool { return lowpoints[i].size > lowpoints[j].size })
+		res = lowpoints[0].size * lowpoints[1].size * lowpoints[2].size
+	}
+	return res
+}
+
+func Day10(part2 bool) int {
+	// buf := Readfile("day10.txt")
 	return 0
 }

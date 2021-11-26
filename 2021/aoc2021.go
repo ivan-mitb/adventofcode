@@ -671,15 +671,6 @@ func Day9(part2 bool) int {
 		}
 		return false
 	}
-	// debug := func(lp []point) {
-	// 	for _, p := range lp {
-	// 		fmt.Printf("%d,%d -> ", p.x, p.y)
-	// 		for _, p := range p.neighbours {
-	// 			fmt.Printf("%d,%d ", p.x, p.y)
-	// 		}
-	// 		println()
-	// 	}
-	// }
 	// returns size of basin around p
 	basin := func(a [][]uint8, p point) int {
 		q := []point{p}
@@ -698,7 +689,6 @@ func Day9(part2 bool) int {
 				}
 			}
 		}
-		// debug(visited)
 		return len(visited)
 	}
 	// find lowpoints
@@ -723,6 +713,7 @@ func Day9(part2 bool) int {
 	if !part2 {
 		return res
 	} else {
+		// find basins
 		for i := range lowpoints {
 			size := basin(a, lowpoints[i])
 			lowpoints[i].size = size
@@ -735,6 +726,86 @@ func Day9(part2 bool) int {
 }
 
 func Day10(part2 bool) int {
-	// buf := Readfile("day10.txt")
-	return 0
+	buf := strings.Split(`[({(<(())[]>[[{[]{<()<>>
+[(()[<>])]({[<{<<[]>>(
+{([(<{}[<>[]}>{[]{[(<()>
+(((({<>}<{<{<>}{[]{[]{}
+[[<[([]))<([[{}[[()]]]
+[{[{({}]{}}([{[{{{}}([]
+{<[[]]>}<{[{[{[]{()[[[]
+[<(<(<(<{}))><([]([]()
+<{([([[(<>()){}]>(<<{{
+<{([{{}}[<[[[<>{}]]]>[]]`, "\n")
+	buf = Readfile("day10.txt")
+	push := func(st []byte, b byte) []byte {
+		return append([]byte{b}, st...)
+	}
+	pop := func(st []byte) ([]byte, byte, bool) {
+		if len(st) > 0 {
+			x := st[0]
+			st = st[1:]
+			return st, x, true
+		} else {
+			return st, 0, false
+		}
+	}
+	type chunk struct {
+		c   byte
+		err int
+	}
+	tbl := map[byte]chunk{
+		')': {'(', 3},
+		']': {'[', 57},
+		'}': {'{', 1197},
+		'>': {'<', 25137},
+	}
+	tbl2 := map[byte]chunk{
+		'(': {')', 1},
+		'[': {']', 2},
+		'{': {'}', 3},
+		'<': {'>', 4},
+	}
+	err := 0
+	scores := []int{}
+	for _, s := range buf {
+		stack := []byte{}
+		errflag := false
+		for _, b := range s {
+			b := byte(b)
+			expected, ok := tbl[b]
+			if !ok {
+				// opening
+				stack = push(stack, b)
+			} else {
+				// closing
+				stck, x, ok := pop(stack)
+				stack = stck
+				if ok {
+					if expected.c != x {
+						err += expected.err
+						errflag = true
+						break
+					}
+				} else {
+					fmt.Println("empty stack")
+					errflag = true
+				}
+			}
+		}
+		if part2 && !errflag {
+			// if stack is not empty => incomplete lines
+			score := 0
+			for _, x := range stack {
+				expected := tbl2[x]
+				score = score*5 + expected.err
+			}
+			scores = append(scores, score)
+		}
+	}
+	if part2 {
+		sort.Slice(scores, func(i, j int) bool { return scores[i] < scores[j] })
+		return scores[len(scores)/2]
+	} else {
+		return err
+	}
 }

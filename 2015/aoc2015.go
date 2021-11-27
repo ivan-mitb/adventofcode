@@ -28,6 +28,22 @@ func Readfile(fn string) (buf []string) {
 	return
 }
 
+func max(x, y int) int {
+	if x < y {
+		return y
+	} else {
+		return x
+	}
+}
+
+func min(x, y int) int {
+	if x < y {
+		return x
+	} else {
+		return y
+	}
+}
+
 // var permute func([]int, []int) [][]int
 
 // recursive function that returns all permutations of input
@@ -117,6 +133,25 @@ func factorial(n int) int {
 		n = n * i
 	}
 	return n
+}
+
+func combinate(a []int, n int) (res [][]int) {
+	var r func(int, int)
+	buf := make([]int, n)
+	r = func(i, j int) {
+		if j == 0 {
+			x := make([]int, n)
+			copy(x, buf)
+			res = append(res, x)
+			return
+		}
+		for x := i; x < len(a)-j+1; x++ {
+			buf[n-j] = a[x]
+			r(x+1, j-1)
+		}
+	}
+	r(0, n)
+	return
 }
 
 func findprimes(extent int) []int {
@@ -708,19 +743,6 @@ func Day8(part2 bool) int {
 	}
 }
 
-func checkdup(input [][]int) {
-	m := make(map[string]int)
-	for _, n := range input {
-		var s []string
-		for _, i := range n {
-			s = append(s, fmt.Sprintf("%d", i))
-		}
-		key := strings.Join(s, "-")
-		m[key]++
-	}
-	println(len(input), len(m))
-}
-
 func Day9(part2 bool) int {
 	buf := Readfile("day9.txt")
 	// buf = []string{"London to Dublin = 464", "London to Belfast = 518", "Dublin to Belfast = 141"}
@@ -1250,25 +1272,6 @@ func Day16(part2 bool) int {
 	return cand
 }
 
-func combinate(a []int, n int) (res [][]int) {
-	var r func(int, int)
-	buf := make([]int, n)
-	r = func(i, j int) {
-		if j == 0 {
-			x := make([]int, n)
-			copy(x, buf)
-			res = append(res, x)
-			return
-		}
-		for x := i; x < len(a)-j+1; x++ {
-			buf[n-j] = a[x]
-			r(x+1, j-1)
-		}
-	}
-	r(0, n)
-	return
-}
-
 func Day17(part2 bool) int {
 	buf := Readfile("day17.txt")
 	// buf = []string{"20", "15", "10", "5", "5"}
@@ -1621,46 +1624,176 @@ func Day20(part2 bool) int {
 }
 
 func Day21(part2 bool) int {
-	/*
-	   	// buf := Readfile("day21.txt")
-	   	buf := strings.Split(`Hit Points: 12
-	   Damage: 7
-	   Armor: 2`, "\n")
-	   	type item struct {
-	   		name, class         string
-	   		cost, damage, armor int
-	   	}
-	   	type player struct {
-	   		hp, damage, armor int
-	   	}
-	   	items := []item{}
-	   	itemstats := `
-	   Weapons:    Cost  Damage  Armor
-	   Dagger        8     4       0
-	   Shortsword   10     5       0
-	   Warhammer    25     6       0
-	   Longsword    40     7       0
-	   Greataxe     74     8       0
+	buf := strings.Split(`Hit Points: 12
+Damage: 7
+Armor: 2`, "\n")
+	buf = Readfile("day21.txt")
+	type player struct {
+		hp, damage, armor int
+	}
+	makeplayer := func(buf []string) player {
+		hp, dmg, arm := 0, 0, 0
+		fmt.Sscanf(buf[0], "Hit Points: %d", &hp)
+		fmt.Sscanf(buf[1], "Damage: %d", &dmg)
+		fmt.Sscanf(buf[2], "Armor: %d", &arm)
+		return player{hp, dmg, arm}
+	}
+	// returns true if me wins
+	play := func(me, boss player) bool {
+		for {
+			boss.hp -= max(1, me.damage-boss.armor)
+			if boss.hp <= 0 {
+				return true
+			}
+			me.hp -= max(1, boss.damage-me.armor)
+			if me.hp <= 0 {
+				return false
+			}
+		}
+	}
+	type item struct {
+		name, class         string
+		cost, damage, armor int
+	}
+	itemstats := strings.Split(`
+Weapons:    Cost  Damage  Armor
+Dagger        8     4       0
+Shortsword   10     5       0
+Warhammer    25     6       0
+Longsword    40     7       0
+Greataxe     74     8       0
 
-	   Armor:      Cost  Damage  Armor
-	   Leather      13     0       1
-	   Chainmail    31     0       2
-	   Splintmail   53     0       3
-	   Bandedmail   75     0       4
-	   Platemail   102     0       5
+Armor:      Cost  Damage  Armor
+Leather      13     0       1
+Chainmail    31     0       2
+Splintmail   53     0       3
+Bandedmail   75     0       4
+Platemail   102     0       5
 
-	   Rings:      Cost  Damage  Armor
-	   Damage +1    25     1       0
-	   Damage +2    50     2       0
-	   Damage +3   100     3       0
-	   Defense +1   20     0       1
-	   Defense +2   40     0       2
-	   Defense +3   80     0       3`
+Rings:      Cost  Damage  Armor
+Damage +1    25     1       0
+Damage +2    50     2       0
+Damage +3   100     3       0
+Defense +1   20     0       1
+Defense +2   40     0       2
+Defense +3   80     0       3`, "\n")
+	getitems := func(buf []string) []item {
+		items := []item{}
+		class := ""
+		for _, s := range itemstats {
+			if strings.Contains(s, ":") {
+				class = strings.Split(s, ":")[0]
+				continue
+			}
+			if len(s) < 20 {
+				continue
+			}
+			name := strings.TrimSpace(s[:12])
+			cost, _ := strconv.Atoi(strings.TrimSpace(s[12:15]))
+			dmge, _ := strconv.Atoi(strings.TrimSpace(s[17:22]))
+			armr, _ := strconv.Atoi(strings.TrimSpace(s[25:]))
+			items = append(items, item{name, class, cost, dmge, armr})
+		}
+		return items
+	}
 
-	   	hp := 100
-	   	damage, armor := 0, 0
+	items := getitems(itemstats)
+	boss := makeplayer(buf)
+	me := player{100, 0, 0}
+	// test
+	// boss = player{12, 7, 2}
+	// me = player{8, 5, 5}
 
-	*/
+	nextweapon := func(items []item) func() item {
+		w := []item{}
+		for _, i := range items {
+			if i.class == "Weapons" {
+				w = append(w, i)
+			}
+		}
+		i := 0
+		return func() item {
+			i++
+			if i <= len(w) {
+				return w[i-1]
+			}
+			return item{}
+		}
+	}(items)
+	iterarmor := func(items []item) func() item {
+		w := []item{{"none", "Armor", 0, 0, 0}}
+		for _, i := range items {
+			if i.class == "Armor" {
+				w = append(w, i)
+			}
+		}
+		i := 0
+		return func() item {
+			i++
+			if i <= len(w) {
+				return w[i-1]
+			}
+			return item{}
+		}
+	}
+	iterring := func(items []item) func() item {
+		r := []item{{"none", "Rings", 0, 0, 0}}
+		r = append(r, r[0]) //duplicate
+		for _, i := range items {
+			if i.class == "Rings" {
+				r = append(r, i)
+			}
+		}
+		n := make([]int, len(r))
+		for i := range n {
+			n[i] = i
+		}
+		c := combinate(n, 2)
+		i := 0
+		return func() item {
+			i++
+			if i <= len(c) {
+				t1, t2 := r[c[i-1][0]], r[c[i-1][1]]
+				t := item{t1.name + "/" + t2.name, "Rings",
+					t1.cost + t2.cost, t1.damage + t2.damage, t1.armor + t2.armor}
+				return t
+			}
+			return item{}
+		}
+	}
+	// combinate items
+	bestcost := 0
+	if !part2 {
+		bestcost = int(1e6)
+	}
+	for w := nextweapon(); w.class != ""; w = nextweapon() {
+		nextarmor := iterarmor(items)
+		for a := nextarmor(); a.class != ""; a = nextarmor() {
+			nextring := iterring(items)
+			for r := nextring(); r.class != ""; r = nextring() {
+				cost := w.cost + a.cost + r.cost
+				me.hp = 100
+				me.damage = w.damage + r.damage
+				me.armor = a.armor + r.armor
+				// fmt.Println(w.name, a.name, r.name, cost, me)
+				boss := player{boss.hp, boss.damage, boss.armor}
+				if !part2 {
+					if play(me, boss) && cost < bestcost {
+						bestcost = cost
+					}
+				} else {
+					if !play(me, boss) && cost > bestcost {
+						bestcost = cost
+					}
+				}
+			}
+		}
+	}
+	return bestcost
+}
+
+func Day22(part2 bool) int {
+	// buf := Readfile("day22.txt")
 	return 0
 }
 

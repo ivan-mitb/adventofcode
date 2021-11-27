@@ -7,26 +7,6 @@ import (
 
 // var days []func(bool) int
 
-func TestAll(t *testing.T) {
-	days := []func(bool) int{
-		Day1, Day2, Day3, Day4, Day5, Day6, Day7new, Day8, Day9, Day10, Day11, Day12, Day13, Day14, Day15, Day16, Day17, Day18, Day19, Day20,
-	}
-	for day, today := range days {
-		fmt.Printf("Day %d.1 %v\n", day+1, today(false))
-		fmt.Printf("Day %d.2 %v\n", day+1, today(true))
-	}
-}
-
-func TestToday(t *testing.T) {
-	today := Day20
-	fmt.Printf("Today.1 %v\n", today(false))
-	// fmt.Printf("Today.2 %v\n", today(true))
-}
-
-func TestScratch(t *testing.T) {
-	fmt.Println("scratch", Scratch())
-}
-
 func BenchmarkPopCount(b *testing.B) {
 	var x uint64 = 0xfedcba9876543210
 	b.Run("base", func(b *testing.B) {
@@ -95,4 +75,24 @@ func BenchmarkPrime(b *testing.B) {
 	b.Run("sieve", func(b *testing.B) {
 		sieve(100000)
 	})
+}
+
+func TestAll(t *testing.T) {
+	days := []func(bool) int{
+		Day1, Day2, Day3, Day4, Day5, Day6, Day7new, Day8, Day9, Day10, Day11, Day12, Day13, Day14, Day15, Day16, Day17, Day18, Day19, Day20, Day21, Day22,
+	}
+	for day, today := range days {
+		fmt.Printf("Day %d.1 %v\n", day+1, today(false))
+		fmt.Printf("Day %d.2 %v\n", day+1, today(true))
+	}
+}
+
+func TestToday(t *testing.T) {
+	today := Day22
+	fmt.Printf("Today.1 %v\n", today(false))
+	// fmt.Printf("Today.2 %v\n", today(true))
+}
+
+func TestScratch(t *testing.T) {
+	fmt.Println("scratch", Scratch())
 }

@@ -915,6 +915,135 @@ func Day11(part2 bool) int {
 }
 
 func Day12(part2 bool) int {
-	// buf = Readfile("day12.txt")
+	ex2 := strings.Split(`dc-end
+HN-start
+start-kj
+dc-start
+dc-HN
+LN-dc
+HN-end
+kj-sa
+kj-HN
+kj-dc`, "\n")
+	ex3 := strings.Split(`fs-end
+he-DX
+fs-he
+start-DX
+pj-DX
+end-zg
+zg-sl
+zg-pj
+pj-he
+RW-he
+fs-DX
+pj-RW
+zg-RW
+start-pj
+he-WI
+zg-he
+pj-fs
+start-RW`, "\n")
+	buf := strings.Split(`start-A
+start-b
+A-c
+A-b
+b-d
+A-end
+b-end`, "\n")
+	in := func(y map[string]int, x string) bool {
+		for n, _ := range y {
+			if x == n {
+				return true
+			}
+		}
+		return false
+	}
+	type node struct {
+		name string
+		prev *node
+	}
+	/*
+		debug := func(n node) {
+			for n.prev != nil {
+				fmt.Print(n.name, ",")
+				n = *n.prev
+			}
+			fmt.Println(n.name)
+		}
+	*/
+	g := map[string][]string{}
+	small := map[string]int{}
+	// returns true if n is found in p's ancestry
+	trace := func(n string, p node) bool {
+		if !in(small, n) {
+			return false
+		}
+		count := map[string]int{n: 1}
+		flag := false
+		for p.prev != nil {
+			if part2 {
+				// ignore uppercase
+				if in(small, p.name) {
+					count[p.name]++
+					if count[p.name] > 1 {
+						if flag { // someone else is already doubled
+							// fmt.Println("trace FAIL", n, count)
+							return true
+						}
+						flag = true
+					}
+				}
+			} else {
+				// part1
+				if p.name == n {
+					return true
+				}
+			}
+			p = *p.prev
+		}
+		// fmt.Println("trace OK", n, count)
+		return false
+	}
+	// ----start----
+	// buf = ex3
+	buf = Readfile("day12.txt")
+	x := len(ex2) + len(ex3)
+	for _, s := range buf {
+		s := strings.Split(s, "-")
+		if s[1] != "start" {
+			g[s[0]] = append(g[s[0]], s[1])
+		}
+		if s[0] != "start" {
+			g[s[1]] = append(g[s[1]], s[0])
+		}
+		if strings.ToLower(s[0]) == s[0] {
+			small[s[0]]++
+		}
+		if strings.ToLower(s[1]) == s[1] {
+			small[s[1]]++
+		}
+	}
+	res := 0
+	x++
+	frontier := []node{{"start", nil}}
+	for len(frontier) > 0 {
+		n := frontier[0]
+		frontier = frontier[1:]
+		if n.name == "end" {
+			// debug(n)
+			res++
+			continue
+		}
+		for _, i := range g[n.name] {
+			if !trace(i, n) {
+				frontier = append(frontier, node{i, &n})
+			}
+		}
+	}
+	return res
+}
+
+func Day13(part2 bool) int {
+	// buf = Readfile("day13.txt")
 	return 0
 }

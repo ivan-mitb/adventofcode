@@ -8,6 +8,7 @@ import (
 	"image/color"
 	"image/png"
 	"log"
+	"math"
 	"os"
 	"sort"
 	"strconv"
@@ -808,7 +809,7 @@ func Day11(part2 bool) int {
 	limit := 100
 	// update and flag flashers
 	if part2 {
-		limit = 1e6
+		limit = math.MaxInt
 	}
 	for step := 0; step < limit; step++ {
 		for i := 0; i < height; i++ {
@@ -1135,29 +1136,41 @@ BB -> N
 BC -> B
 CC -> N
 CN -> C`)
-	// buf = aoc.Readfile("day14.txt")
+	buf = aoc.Readfile("day14.txt")
 	template := buf[0]
-	rules := map[string]string{}
+	rules := map[string][]string{}
 	for _, s := range buf[2:] {
 		s := strings.Split(s, " -> ")
-		rules[s[0]] = s[1]
+		rules[s[0]] = []string{s[0][:1] + s[1], s[1] + s[0][1:2]}
 	}
-	for cycle := 0; cycle < 10; cycle++ {
-		res := bytes.NewBufferString(template[:1])
-		for i := 0; i < len(template)-1; i++ {
-			res.WriteString(rules[template[i:i+2]])
-			res.WriteByte(byte(template[i+1]))
-			// fmt.Print(res, " ")
+	ngrams := map[string]int{}
+	// chop template into 2-grams
+	for i := 0; i < len(template)-1; i++ {
+		ngrams[template[i:i+2]]++
+	}
+	tail := template[len(template)-2:]
+	limit := 10
+	if part2 {
+		limit = 40
+	}
+	for cycle := 0; cycle < limit; cycle++ {
+		res := map[string]int{}
+		// fmt.Println(ngrams, tail)
+		for i, n := range ngrams {
+			for _, j := range rules[i] {
+				res[j] += n
+			}
 		}
-		template = res.String()
-		fmt.Println(len(template))
+		tail = rules[tail][1]
+		ngrams = res
 	}
 	// element counts
 	freq := map[string]int{}
-	for _, c := range template {
-		freq[string(c)]++
+	for i, n := range ngrams {
+		freq[i[0:1]] += n
 	}
-	min, max := int(1e6), 0
+	freq[tail[1:]]++
+	min, max := math.MaxInt, 0
 	for _, n := range freq {
 		if n > max {
 			max = n
@@ -1167,4 +1180,8 @@ CN -> C`)
 		}
 	}
 	return max - min
+}
+
+func Day15(part2 bool) int {
+	return 0
 }

@@ -6,6 +6,7 @@ import (
 	"crypto/md5"
 	"encoding/json"
 	"fmt"
+	"math"
 	"regexp"
 	"sort"
 	"strconv"
@@ -616,7 +617,7 @@ func Day9(part2 bool) int {
 	locperms := aoc.Permute2(indices)
 	// check no duplicates
 	// checkdup(locperms)
-	mindist := int(1e6)
+	mindist := math.MaxInt
 	maxdist := 0
 	for _, route := range locperms {
 		d := routedist(route)
@@ -855,7 +856,7 @@ func Day13(part2 bool) int {
 	for i := range n {
 		n[i] = i
 	}
-	bestscore := int(-1e6)
+	bestscore := math.MinInt
 	// for _, p := range permute(nil, n) {
 	for _, p := range aoc.Permute2(n) {
 		score := 0
@@ -879,7 +880,7 @@ func Day14(part2 bool) int {
 	// Dancer can fly 16 km/s for 11 seconds, but then must rest for 162 seconds.`, "\n")
 	// parse
 	if !part2 {
-		maxdist := int(-1e6)
+		maxdist := math.MinInt
 		for _, s := range buf {
 			s := strings.Fields(s)
 			// who, _ := strconv.Atoi(s[0])
@@ -1592,7 +1593,7 @@ Defense +3   80     0       3`, "\n")
 	// combinate items
 	bestcost := 0
 	if !part2 {
-		bestcost = int(1e6)
+		bestcost = math.MaxInt
 	}
 	for w := nextweapon(); w.class != ""; w = nextweapon() {
 		nextarmor := iterarmor(items)

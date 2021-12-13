@@ -1117,5 +1117,54 @@ fold along x=5`)
 }
 
 func Day14(part2 bool) int {
-	return 0
+	buf := aoc.Readstring(`NNCB
+
+CH -> B
+HH -> N
+CB -> H
+NH -> C
+HB -> C
+HC -> B
+HN -> C
+NN -> C
+BH -> H
+NC -> B
+NB -> B
+BN -> B
+BB -> N
+BC -> B
+CC -> N
+CN -> C`)
+	// buf = aoc.Readfile("day14.txt")
+	template := buf[0]
+	rules := map[string]string{}
+	for _, s := range buf[2:] {
+		s := strings.Split(s, " -> ")
+		rules[s[0]] = s[1]
+	}
+	for cycle := 0; cycle < 10; cycle++ {
+		res := bytes.NewBufferString(template[:1])
+		for i := 0; i < len(template)-1; i++ {
+			res.WriteString(rules[template[i:i+2]])
+			res.WriteByte(byte(template[i+1]))
+			// fmt.Print(res, " ")
+		}
+		template = res.String()
+		fmt.Println(len(template))
+	}
+	// element counts
+	freq := map[string]int{}
+	for _, c := range template {
+		freq[string(c)]++
+	}
+	min, max := int(1e6), 0
+	for _, n := range freq {
+		if n > max {
+			max = n
+		}
+		if n < min {
+			min = n
+		}
+	}
+	return max - min
 }

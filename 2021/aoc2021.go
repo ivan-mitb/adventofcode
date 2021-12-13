@@ -2,7 +2,12 @@ package aoc
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
+	"image"
+	"image/color"
+	"image/png"
+	"log"
 	"os"
 	"sort"
 	"strconv"
@@ -20,6 +25,16 @@ func Readfile(fn string) (buf []string) {
 	}
 	f.Close()
 	return
+}
+
+// returns example string split into []string
+func Readstring(s string) (buf []string) {
+	// buf = strings.Split(s, "\n")
+	sc := bufio.NewScanner(strings.NewReader(s))
+	for sc.Scan() {
+		buf = append(buf, sc.Text())
+	}
+	return buf
 }
 
 func setdiff(a, b []byte) (res []byte) {
@@ -71,6 +86,10 @@ func setunion(a, b []byte) []byte {
 		}
 	}
 	return res
+}
+
+func abs(i int) int {
+	return max(i, -i)
 }
 
 func max(x, y int) int {
@@ -1043,7 +1062,155 @@ b-end`, "\n")
 	return res
 }
 
+// bonus: output to PNG !
 func Day13(part2 bool) int {
-	// buf = Readfile("day13.txt")
+	buf := Readstring(`6,10
+0,14
+9,10
+0,3
+10,4
+4,11
+6,0
+6,12
+4,1
+0,13
+10,12
+3,4
+3,0
+8,4
+1,10
+2,14
+8,10
+9,0
+
+fold along y=7
+fold along x=5`)
+	buf = Readfile("day13.txt")
+	type point [2]int
+	width, height := 0, 0
+	dots := []point{}
+	fold := []point{}
+	// updates dots with new positions
+	newpos := func(i, line int) int {
+		if i > line {
+			i = line - (i - line)
+		}
+		return i
+	}
+	makefold := func(p point) {
+		if p[0] == 0 {
+			// fold up along y=...
+			for i, d := range dots {
+				dots[i][1] = newpos(d[1], p[1])
+			}
+		} else {
+			// fold left along x=...
+			for i, d := range dots {
+				dots[i][0] = newpos(d[0], p[0])
+			}
+		}
+	}
+	count := func() int {
+		m := map[int]int{}
+		for _, d := range dots {
+			m[d[0]*0x100000000+d[1]]++
+		}
+		return len(m)
+	}
+	image := func(l, t, r, b int, data map[int]point) image.Image {
+		img := image.NewGray(image.Rectangle{image.Point{l, t}, image.Point{r + 1, b + 1}})
+		for _, p := range data {
+			img.Set(p[0], p[1], color.Gray{0xff})
+		}
+
+		f, err := os.Create("day13image.png")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if err := png.Encode(f, img); err != nil {
+			f.Close()
+			log.Fatal(err)
+		}
+
+		if err := f.Close(); err != nil {
+			log.Fatal(err)
+		}
+
+		return img
+	}
+	// ingest
+	for _, s := range buf {
+		if len(s) == 0 {
+			continue
+		}
+		if strings.Contains(s, "fold") {
+			s := strings.TrimPrefix(s, "fold along ")
+			var axis int
+			fmt.Sscanf(s[2:], "%d", &axis)
+			p := point{}
+			if s[0] == 'x' {
+				p = point{axis, 0}
+			} else {
+				p = point{0, axis}
+			}
+			fold = append(fold, p)
+		} else {
+			x, y := 0, 0
+			fmt.Sscanf(s, "%d,%d", &x, &y)
+			dots = append(dots, point{x, y})
+			if x > width {
+				width = x
+			}
+			if y > height {
+				height = y
+			}
+		}
+	}
+	// fold & update pos
+	if !part2 {
+		makefold(fold[0])
+		return count()
+	} else {
+		for _, f := range fold {
+			makefold(f)
+		}
+		m := map[int]point{}
+		l, r, t, b := width, 0, height, 0
+		// unique points & new extents
+		for _, d := range dots {
+			m[d[0]*0x100000000+d[1]] = d
+			if d[0] > r {
+				r = d[0]
+			}
+			if d[0] < l {
+				l = d[0]
+			}
+			if d[1] > b {
+				b = d[1]
+			}
+			if d[1] < t {
+				t = d[1]
+			}
+		}
+		grid := make([][]byte, b-t+1)
+		for i := range grid {
+			row := bytes.Repeat([]byte{' '}, r-l+1)
+			grid[i] = row
+		}
+		for _, p := range m {
+			grid[p[1]][p[0]] = '#'
+		}
+		for i := range grid {
+			fmt.Println(string(grid[i]))
+		}
+		if false {
+			image(l, t, r, b, m)
+		}
+	}
+	return 0
+}
+
+func Day14(part2 bool) int {
 	return 0
 }

@@ -1,7 +1,7 @@
-package aoc
+package aoc2021
 
 import (
-	"bufio"
+	"aoc"
 	"bytes"
 	"fmt"
 	"image"
@@ -14,102 +14,8 @@ import (
 	"strings"
 )
 
-func Readfile(fn string) (buf []string) {
-	f, err := os.Open(fn)
-	if err != nil {
-		fmt.Errorf("error: %s\n", err)
-	}
-	s := bufio.NewScanner(f)
-	for s.Scan() {
-		buf = append(buf, s.Text())
-	}
-	f.Close()
-	return
-}
-
-// returns example string split into []string
-func Readstring(s string) (buf []string) {
-	// buf = strings.Split(s, "\n")
-	sc := bufio.NewScanner(strings.NewReader(s))
-	for sc.Scan() {
-		buf = append(buf, sc.Text())
-	}
-	return buf
-}
-
-func setdiff(a, b []byte) (res []byte) {
-	i, j := 0, 0
-	for i < len(a) && j < len(b) {
-		if a[i] == b[j] {
-			i++
-			j++
-			continue
-		}
-		if a[i] < b[j] {
-			res = append(res, a[i])
-			i++
-			continue
-		}
-		if a[i] >= b[j] {
-			j++
-		}
-	}
-	if i < len(a) {
-		res = append(res, a[i:]...)
-	}
-	return res
-}
-
-func setunion(a, b []byte) []byte {
-	res := []byte{}
-	i, j := 0, 0
-	for {
-		if i < len(a) && j < len(b) {
-			if a[i] == b[j] {
-				res = append(res, a[i])
-				i++
-				j++
-			} else if a[i] < b[j] {
-				res = append(res, a[i])
-				i++
-			} else {
-				res = append(res, b[j])
-				j++
-			}
-		} else {
-			if i < len(a) {
-				res = append(res, a[i:]...)
-			} else if j < len(b) {
-				res = append(res, b[j:]...)
-			}
-			break
-		}
-	}
-	return res
-}
-
-func abs(i int) int {
-	return max(i, -i)
-}
-
-func max(x, y int) int {
-	if x < y {
-		return y
-	} else {
-		return x
-	}
-}
-
-func min(x, y int) int {
-	if x < y {
-		return x
-	} else {
-		return y
-	}
-}
-
 func Day1(part2 bool) int {
-	buf := Readfile("day1.txt")
+	buf := aoc.Readfile("day1.txt")
 	// buf = []string{"199",
 	// 	"200",
 	// 	"208",
@@ -160,7 +66,7 @@ func Day1(part2 bool) int {
 }
 
 func Day2(part2 bool) int {
-	buf := Readfile("day2.txt")
+	buf := aoc.Readfile("day2.txt")
 	pos, depth, aim := 0, 0, 0
 	if !part2 {
 		for _, s := range buf {
@@ -197,7 +103,7 @@ func Day2(part2 bool) int {
 }
 
 func Day3(part2 bool) int {
-	buf := Readfile("day3.txt")
+	buf := aoc.Readfile("day3.txt")
 	// buf = strings.Fields(`00100
 	// 11110
 	// 10110
@@ -222,7 +128,6 @@ func Day3(part2 bool) int {
 					}
 				}
 			}
-
 		} else {
 			counts = []int{0}
 			for _, s := range buf {
@@ -294,7 +199,7 @@ func Day3(part2 bool) int {
 }
 
 func Day4(part2 bool) int {
-	buf := Readfile("day4.txt")
+	buf := aoc.Readfile("day4.txt")
 	// 	buf := strings.Split(`7,4,9,5,11,17,23,2,0,14,21,24,10,16,13,6,15,25,12,22,18,20,8,19,3,26,1
 
 	// 22 13 17 11  0
@@ -385,7 +290,7 @@ func Day4(part2 bool) int {
 }
 
 func Day5(part2 bool) int {
-	buf := Readfile("day5.txt")
+	buf := aoc.Readfile("day5.txt")
 	// 	buf := strings.Split(`0,9 -> 5,9
 	// 8,0 -> 0,8
 	// 9,4 -> 3,4
@@ -455,7 +360,7 @@ func Day5(part2 bool) int {
 }
 
 func Day6(part2 bool) int {
-	buf := Readfile("day6.txt")
+	buf := aoc.Readfile("day6.txt")
 	// buf := []string{`3,4,3,1,2`}
 	s := strings.Split(buf[0], ",")
 	fish := make([]int, 10)
@@ -485,7 +390,7 @@ func Day6(part2 bool) int {
 }
 
 func Day7(part2 bool) int {
-	buf := Readfile("day7.txt")
+	buf := aoc.Readfile("day7.txt")
 	// buf := []string{`16,1,2,0,4,2,7,1,2,14`}
 	s := strings.Split(buf[0], ",")
 	// min, mean, max
@@ -536,7 +441,7 @@ func Day7(part2 bool) int {
 }
 
 func Day8(part2 bool) int {
-	buf := Readfile("day8.txt")
+	buf := aoc.Readfile("day8.txt")
 	// `acedgfb cdfbe gcdfa fbcad dab cefabd cdfgeb eafb cagedb ab | cdfeb fcadb cdfeb cdbaf`
 	// buf := strings.Split(
 	// 	`be cfbegad cbdgef fgaecd cgeb fdcge agebfd fecdb fabcd edb | fdgacbe cefdb cefbgd gcbe
@@ -599,16 +504,16 @@ func Day8(part2 bool) int {
 					cf = j
 				case 3: // '7'
 					savedigit(j, 7)
-					a = setdiff(j, cf)
+					a = aoc.Setdiff(j, cf)
 				case 4: // '4'
 					savedigit(j, 4)
-					bd = setdiff(j, cf)
+					bd = aoc.Setdiff(j, cf)
 				case 5: // '235'
-					abdcf := setunion(a, setunion(bd, cf))
-					x := setdiff(j, abdcf)
+					abdcf := aoc.Setunion(a, aoc.Setunion(bd, cf))
+					x := aoc.Setdiff(j, abdcf)
 					if len(x) == 1 {
 						// g = x
-						if len(setdiff(cf, j)) == 1 {
+						if len(aoc.Setdiff(cf, j)) == 1 {
 							// '5'
 							savedigit(j, 5)
 						} else {
@@ -620,10 +525,10 @@ func Day8(part2 bool) int {
 						savedigit(j, 2)
 					}
 				case 6: // '0' 6 9
-					if len(setdiff(bd, j)) > 0 {
+					if len(aoc.Setdiff(bd, j)) > 0 {
 						savedigit(j, 0)
 					} else {
-						if len(setdiff(cf, j)) == 1 {
+						if len(aoc.Setdiff(cf, j)) == 1 {
 							savedigit(j, 6)
 						} else {
 							savedigit(j, 9)
@@ -650,7 +555,7 @@ func Day8(part2 bool) int {
 }
 
 func Day9(part2 bool) int {
-	buf := Readfile("day9.txt")
+	buf := aoc.Readfile("day9.txt")
 	// 	buf := strings.Split(`2199943210
 	// 3987894921
 	// 9856789892
@@ -771,7 +676,7 @@ func Day10(part2 bool) int {
 [<(<(<(<{}))><([]([]()
 <{([([[(<>()){}]>(<<{{
 <{([{{}}[<[[[<>{}]]]>[]]`, "\n")
-	buf = Readfile("day10.txt")
+	buf = aoc.Readfile("day10.txt")
 	push := func(st []byte, b byte) []byte {
 		return append([]byte{b}, st...)
 	}
@@ -863,7 +768,7 @@ func Day11(part2 bool) int {
 	   19991
 	   11111`, "\n")
 	*/
-	buf = Readfile("day11.txt")
+	buf = aoc.Readfile("day11.txt")
 	height := len(buf)
 	width := len(buf[0])
 	type octo struct {
@@ -882,10 +787,10 @@ func Day11(part2 bool) int {
 	// main loop
 	var boost func([][]octo, int, int)
 	boost_neighbours := func(p [][]octo, i, j int) {
-		x1 := max(0, i-1)
-		x2 := min(height-1, i+1)
-		y1 := max(0, j-1)
-		y2 := min(width-1, j+1)
+		x1 := aoc.Max(0, i-1)
+		x2 := aoc.Min(height-1, i+1)
+		y1 := aoc.Max(0, j-1)
+		y2 := aoc.Min(width-1, j+1)
 		for x := x1; x <= x2; x++ {
 			for y := y1; y <= y2; y++ {
 				boost(p, x, y)
@@ -1025,7 +930,7 @@ b-end`, "\n")
 	}
 	// ----start----
 	// buf = ex3
-	buf = Readfile("day12.txt")
+	buf = aoc.Readfile("day12.txt")
 	x := len(ex2) + len(ex3)
 	for _, s := range buf {
 		s := strings.Split(s, "-")
@@ -1064,7 +969,7 @@ b-end`, "\n")
 
 // bonus: output to PNG !
 func Day13(part2 bool) int {
-	buf := Readstring(`6,10
+	buf := aoc.Readstring(`6,10
 0,14
 9,10
 0,3
@@ -1085,7 +990,7 @@ func Day13(part2 bool) int {
 
 fold along y=7
 fold along x=5`)
-	buf = Readfile("day13.txt")
+	buf = aoc.Readfile("day13.txt")
 	type point [2]int
 	width, height := 0, 0
 	dots := []point{}

@@ -1,6 +1,7 @@
-package aoc
+package aoc2015
 
 import (
+	"aoc"
 	"fmt"
 	"testing"
 )
@@ -35,20 +36,20 @@ func TestPermute2(t *testing.T) {
 	a := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}
 	a = a[:10]
 	// fmt.Println(permute2(a))
-	permute2(a)
+	aoc.Permute2(a)
 }
 
 func TestPermute3(t *testing.T) {
 	a := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}
 	a = a[:10]
 	// fmt.Println(permute3(a))
-	permute3(a)
+	aoc.Permute3(a)
 }
 
 func TestCombinate(t *testing.T) {
 	a := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}
 	a = a[:]
-	fmt.Println(combinate(a, 3))
+	fmt.Println(aoc.Combinate(a, 3))
 }
 
 func BenchmarkPermute(b *testing.B) {
@@ -56,13 +57,13 @@ func BenchmarkPermute(b *testing.B) {
 	a = a[:8]
 	var res, res2, res3 [][]int
 	b.Run("permute", func(b *testing.B) {
-		res = permute(nil, a)
+		res = aoc.Permute(nil, a)
 	})
 	b.Run("permute2", func(b *testing.B) {
-		res2 = permute2(a)
+		res2 = aoc.Permute2(a)
 	})
 	b.Run("permute3", func(b *testing.B) {
-		res3 = permute3(a)
+		res3 = aoc.Permute3(a)
 	})
 	println(len(res) == len(res2))
 	println(len(res) == len(res3))
@@ -70,10 +71,10 @@ func BenchmarkPermute(b *testing.B) {
 
 func BenchmarkPrime(b *testing.B) {
 	b.Run("findprime", func(b *testing.B) {
-		findprimes(100000)
+		aoc.Findprimes(100000)
 	})
 	b.Run("sieve", func(b *testing.B) {
-		sieve(100000)
+		aoc.Sieve(100000)
 	})
 }
 

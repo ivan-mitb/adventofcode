@@ -1,12 +1,11 @@
 // package aoc2015 implements solutions for Advent of Code 2015
-package aoc
+package aoc2015
 
 import (
-	"bufio"
+	"aoc"
 	"crypto/md5"
 	"encoding/json"
 	"fmt"
-	"os"
 	"regexp"
 	"sort"
 	"strconv"
@@ -15,179 +14,8 @@ import (
 
 // https://adventofcode.com/2015/day/1/input
 
-func Readfile(fn string) (buf []string) {
-	f, err := os.Open(fn)
-	if err != nil {
-		fmt.Errorf("error: %s\n", err)
-	}
-	s := bufio.NewScanner(f)
-	for s.Scan() {
-		buf = append(buf, s.Text())
-	}
-	f.Close()
-	return
-}
-
-func max(x, y int) int {
-	if x < y {
-		return y
-	} else {
-		return x
-	}
-}
-
-func min(x, y int) int {
-	if x < y {
-		return x
-	} else {
-		return y
-	}
-}
-
-// var permute func([]int, []int) [][]int
-
-// recursive function that returns all permutations of input
-func permute(prefix []int, input []int) [][]int {
-	if len(input) == 0 {
-		return [][]int{prefix}
-	}
-	var res [][]int
-	for i := range input {
-		cc := make([]int, len(input))
-		copy(cc, input) // builtin
-		if i > 0 {
-			cc[0], cc[i] = cc[i], cc[0]
-		}
-		// newprefix := append(prefix, cc[0])
-		newprefix := make([]int, len(prefix)+1)
-		copy(newprefix, prefix)
-		newprefix[len(prefix)] = cc[0]
-		p := permute(newprefix, cc[1:])
-		res = append(res, p...)
-		// fmt.Println("  append", prefix, p)
-	}
-	return res
-}
-
-// using minimal copying; swap and unswap items in-place
-func permute2(a []int) (res [][]int) {
-	var r func([]int, int)
-	r = func(a []int, i int) {
-		if i == len(a)-1 {
-			x := make([]int, len(a))
-			copy(x, a)
-			res = append(res, x)
-			return
-		}
-		for x := i; x < len(a); x++ {
-			if x > i {
-				a[x], a[i] = a[i], a[x]
-			}
-			r(a, i+1)
-			if x > i {
-				a[x], a[i] = a[i], a[x]
-			}
-		}
-	}
-	r(a, 0)
-	return res
-}
-
-// using goroutines is 10x slower
-func permute3(a []int) (res [][]int) {
-	ch := make(chan []int, 10)
-	var r func([]int, int)
-	r = func(a []int, i int) {
-		if i == len(a)-1 {
-			ch <- a
-			return
-		}
-		for x := i; x < len(a); x++ {
-			if x > i {
-				a[x], a[i] = a[i], a[x]
-			}
-			b := make([]int, len(a))
-			copy(b, a)
-			if i < 2 {
-				go r(b, i+1)
-			} else {
-				r(b, i+1)
-			}
-			if x > i {
-				a[x], a[i] = a[i], a[x]
-			}
-		}
-	}
-	go r(a, 0)
-	for i := 0; i < factorial(len(a)); i++ {
-		a := <-ch
-		res = append(res, a)
-	}
-	return res
-}
-
-func factorial(n int) int {
-	i := n
-	for i > 1 {
-		i--
-		n = n * i
-	}
-	return n
-}
-
-func combinate(a []int, n int) (res [][]int) {
-	var r func(int, int)
-	buf := make([]int, n)
-	r = func(i, j int) {
-		if j == 0 {
-			x := make([]int, n)
-			copy(x, buf)
-			res = append(res, x)
-			return
-		}
-		for x := i; x < len(a)-j+1; x++ {
-			buf[n-j] = a[x]
-			r(x+1, j-1)
-		}
-	}
-	r(0, n)
-	return
-}
-
-func findprimes(extent int) []int {
-	res := []int{}
-	for i := 3; i < extent; i += 2 {
-		div := false
-		for j := 2; j < i/2; j++ {
-			if i%j == 0 {
-				div = true
-				break
-			}
-		}
-		if div == false {
-			res = append(res, i)
-		}
-	}
-	return append([]int{2}, res...)
-}
-
-// of Eratosthenes B-)
-func sieve(extent int) []int {
-	n := make([]bool, extent)
-	res := []int{}
-	for i := 2; i < extent; i++ {
-		if !n[i] {
-			res = append(res, i)
-			for j := i; j < extent; j += i {
-				n[j] = true
-			}
-		}
-	}
-	return res
-}
-
 func Day1(part2 bool) int {
-	buf := Readfile("day1.txt")
+	buf := aoc.Readfile("day1.txt")
 	i := 0
 	for n, c := range buf[0] {
 		if part2 {
@@ -206,7 +34,7 @@ func Day1(part2 bool) int {
 }
 
 func Day2(part2 bool) int {
-	buf := Readfile("day2.txt")
+	buf := aoc.Readfile("day2.txt")
 	var area, peri int
 	for _, s := range buf {
 		l := []int{0, 0, 0}
@@ -223,7 +51,7 @@ func Day2(part2 bool) int {
 }
 
 func Day3(part2 bool) int {
-	buf := Readfile("day3.txt")[0]
+	buf := aoc.Readfile("day3.txt")[0]
 	type point [2]int
 	var location [2]point
 	var who int // 0 santa 1 robo
@@ -274,7 +102,7 @@ func Day4(part2 bool) int {
 }
 
 func Day5(part2 bool) int {
-	buf := Readfile("day5.txt")
+	buf := aoc.Readfile("day5.txt")
 	res := 0
 	if !part2 {
 		// buf := []string{"ugknbfddgicrmopn", "aaa", "jchzalrnumimnmhp"}
@@ -339,7 +167,7 @@ func Day5(part2 bool) int {
 }
 
 func Day6(part2 bool) int {
-	buf := Readfile("day6.txt")
+	buf := aoc.Readfile("day6.txt")
 	var arr [1000][1000]int8
 	for _, s := range buf {
 		var x1, y1, x2, y2 int
@@ -414,7 +242,7 @@ func Day7new(part2 bool) int {
 	}
 
 	var valuenodes []string // list of nodes with value given
-	buf := Readfile(`day7.txt`)
+	buf := aoc.Readfile(`day7.txt`)
 	var graph map[string]Node
 	re := regexp.MustCompile(`([a-z]+|[0-9]+)* *([A-Z]+)* *([a-z0-9]+)`)
 
@@ -578,7 +406,7 @@ func Day7(part2 bool) int {
 		resp, err := http.Get(url)
 		fmt.Println(err, resp)
 	*/
-	buf := Readfile(`day7.txt`)
+	buf := aoc.Readfile(`day7.txt`)
 	soln := make(map[string]int)
 	dict := make(map[string][]string, len(buf))
 	re := regexp.MustCompile(`([a-z]+|[0-9]+)* *([A-Z]+)* *([a-z0-9]+)`)
@@ -695,7 +523,7 @@ func Day7(part2 bool) int {
 }
 
 func Day8(part2 bool) int {
-	buf := Readfile("day8.txt")
+	buf := aoc.Readfile("day8.txt")
 	// buf = []string{`""`, `"abc"`, `"aaa\"aaa"`, `"\x27"`}
 	// buf = []string{`"\"\\\x27"`}
 	rePar, _ := regexp.Compile(`\\x[0-9a-f]{2}`)
@@ -744,7 +572,7 @@ func Day8(part2 bool) int {
 }
 
 func Day9(part2 bool) int {
-	buf := Readfile("day9.txt")
+	buf := aoc.Readfile("day9.txt")
 	// buf = []string{"London to Dublin = 464", "London to Belfast = 518", "Dublin to Belfast = 141"}
 	dist := make(map[string]int)
 	locations := make(map[string]int)
@@ -785,7 +613,7 @@ func Day9(part2 bool) int {
 		indices[i] = i
 	}
 	// locperms := permute(nil, indices)
-	locperms := permute2(indices)
+	locperms := aoc.Permute2(indices)
 	// check no duplicates
 	// checkdup(locperms)
 	mindist := int(1e6)
@@ -924,7 +752,7 @@ func Day11(part2 bool) int {
 }
 
 func Day12(part2 bool) int {
-	buf := Readfile("day12.txt")
+	buf := aoc.Readfile("day12.txt")
 	/*
 		buf := []string{"[]", "{}", "[1,2,3]",
 			`{"a":2,"b":4}`,
@@ -982,7 +810,7 @@ func Day12(part2 bool) int {
 }
 
 func Day13(part2 bool) int {
-	buf := Readfile("day13.txt")
+	buf := aoc.Readfile("day13.txt")
 	// 	buf = strings.Split(`Alice would gain 54 happiness units by sitting next to Bob.
 	// Alice would lose 79 happiness units by sitting next to Carol.
 	// Alice would lose 2 happiness units by sitting next to David.
@@ -1029,7 +857,7 @@ func Day13(part2 bool) int {
 	}
 	bestscore := int(-1e6)
 	// for _, p := range permute(nil, n) {
-	for _, p := range permute2(n) {
+	for _, p := range aoc.Permute2(n) {
 		score := 0
 		// compute each diner's score
 		for i := range names {
@@ -1046,7 +874,7 @@ func Day13(part2 bool) int {
 }
 
 func Day14(part2 bool) int {
-	buf := Readfile("day14.txt")
+	buf := aoc.Readfile("day14.txt")
 	// buf = strings.Split(`Comet can fly 14 km/s for 10 seconds, but then must rest for 127 seconds.
 	// Dancer can fly 16 km/s for 11 seconds, but then must rest for 162 seconds.`, "\n")
 	// parse
@@ -1134,7 +962,7 @@ func Day14(part2 bool) int {
 }
 
 func Day15(part2 bool) int {
-	buf := Readfile("day15.txt")
+	buf := aoc.Readfile("day15.txt")
 	buf = strings.Split(`Butterscotch: capacity -1, durability -2, flavor 6, texture 3, calories 8
 	Cinnamon: capacity 2, durability 3, flavor -2, texture -1, calories 3`, "\n")
 	type ing struct {
@@ -1204,7 +1032,7 @@ func Day15(part2 bool) int {
 }
 
 func Day16(part2 bool) int {
-	buf := Readfile("day16.txt")
+	buf := aoc.Readfile("day16.txt")
 	// the real aunt
 	/*
 		type aunt struct {
@@ -1273,7 +1101,7 @@ func Day16(part2 bool) int {
 }
 
 func Day17(part2 bool) int {
-	buf := Readfile("day17.txt")
+	buf := aoc.Readfile("day17.txt")
 	// buf = []string{"20", "15", "10", "5", "5"}
 	containers := []int{}
 	for _, s := range buf {
@@ -1287,7 +1115,7 @@ func Day17(part2 bool) int {
 	mincontainers := make(map[int]int)
 	score := 0
 	for n := 0; n < len(containers); n++ {
-		for _, p := range combinate(p, n) {
+		for _, p := range aoc.Combinate(p, n) {
 			sum := 0
 			for _, i := range p {
 				sum += containers[i]
@@ -1314,7 +1142,7 @@ func Day17(part2 bool) int {
 }
 
 func Day18(part2 bool) int {
-	buf := Readfile("day18.txt")
+	buf := aoc.Readfile("day18.txt")
 	// buf = []string{".#.#.#",
 	// 	"...##.",
 	// 	"#....#",
@@ -1437,7 +1265,7 @@ func Day18(part2 bool) int {
 
 // amazing A* search
 func Day19(part2 bool) int {
-	buf := Readfile("day19.txt")
+	buf := aoc.Readfile("day19.txt")
 	// 	buf = strings.Split(`e => H
 	// e => O
 	// H => HO
@@ -1549,7 +1377,7 @@ func Day19(part2 bool) int {
 }
 
 func Day20(part2 bool) int {
-	primes := sieve(10000)
+	primes := aoc.Sieve(10000)
 	memo := make(map[int][]int)
 	factorise := func(estimate int) []int {
 		n := estimate
@@ -1624,10 +1452,10 @@ func Day20(part2 bool) int {
 }
 
 func Day21(part2 bool) int {
-	buf := strings.Split(`Hit Points: 12
+	buf := aoc.Readstring(`Hit Points: 12
 Damage: 7
-Armor: 2`, "\n")
-	buf = Readfile("day21.txt")
+Armor: 2`)
+	buf = aoc.Readfile("day21.txt")
 	type player struct {
 		hp, damage, armor int
 	}
@@ -1641,11 +1469,11 @@ Armor: 2`, "\n")
 	// returns true if me wins
 	play := func(me, boss player) bool {
 		for {
-			boss.hp -= max(1, me.damage-boss.armor)
+			boss.hp -= aoc.Max(1, me.damage-boss.armor)
 			if boss.hp <= 0 {
 				return true
 			}
-			me.hp -= max(1, boss.damage-me.armor)
+			me.hp -= aoc.Max(1, boss.damage-me.armor)
 			if me.hp <= 0 {
 				return false
 			}
@@ -1748,7 +1576,7 @@ Defense +3   80     0       3`, "\n")
 		for i := range n {
 			n[i] = i
 		}
-		c := combinate(n, 2)
+		c := aoc.Combinate(n, 2)
 		i := 0
 		return func() item {
 			i++
@@ -1793,7 +1621,7 @@ Defense +3   80     0       3`, "\n")
 }
 
 func Day22(part2 bool) int {
-	// buf := Readfile("day22.txt")
+	// buf := aoc.Readfile("day22.txt")
 	return 0
 }
 

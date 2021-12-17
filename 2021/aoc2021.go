@@ -1183,5 +1183,106 @@ CN -> C`)
 }
 
 func Day15(part2 bool) int {
-	return 0
+	buf := aoc.Readstring(`1163751742
+1381373672
+2136511328
+3694931569
+7463417111
+1319128137
+1359912421
+3125421639
+1293138521
+2311944581`)
+	// buf = aoc.Readfile("day15.txt")
+	height := len(buf)
+	width := len(buf[0])
+	grid := make([][]uint8, height)
+	for i := range grid {
+		row := make([]uint8, width)
+		for j := range buf[i] {
+			n, _ := strconv.Atoi(buf[i][j : j+1])
+			row[j] = uint8(n)
+		}
+		grid[i] = row
+	}
+	type point [2]int
+	type node struct {
+		p    point
+		path []*node
+		cost int
+	}
+	in := func(path []*node, p point) bool {
+		for _, n := range path {
+			if n.p == p {
+				return true
+			}
+		}
+		return false
+	}
+	pos := point{0, 0}
+	frontier := []node{{pos, nil, 0}}
+	memo := map[point]int{}
+	bestcost := math.MaxInt
+	// DFS
+	for len(frontier) > 0 {
+		n := frontier[len(frontier)-1]
+		// println(len(frontier))
+		frontier = frontier[:len(frontier)-1]
+		p := n.p
+		if p[0] == height-1 && p[1] == width-1 {
+			// fmt.Println("found", n.cost)
+			// update memo with best costs at each point
+			totalcost := n.cost
+			for _, n := range n.path {
+				cost2dest := totalcost - n.cost
+				mcost, ok := memo[n.p]
+				if ok {
+					if cost2dest < mcost {
+						memo[n.p] = cost2dest
+					}
+				} else {
+					memo[n.p] = cost2dest
+				}
+			}
+			if totalcost < bestcost {
+				bestcost = totalcost
+			}
+			continue
+		}
+		if in(n.path, p) {
+			// abandon already visited
+			continue
+		}
+		enqueue := func(np point) {
+			mcost, ok := memo[np]
+			if !ok {
+				mcost = int(grid[np[0]][np[1]])
+			}
+			// mcost = 0
+			cost := n.cost + mcost
+			if cost <= bestcost {
+				frontier = append(frontier,
+					node{np, append(n.path, &n), cost})
+			}
+		}
+		if p[0] > 0 {
+			npoint := point{p[0] - 1, p[1]}
+			enqueue(npoint)
+		}
+		if p[0] < height-1 {
+			npoint := point{p[0] + 1, p[1]}
+			enqueue(npoint)
+		}
+		if p[1] > 0 {
+			npoint := point{p[0], p[1] - 1}
+			enqueue(npoint)
+		}
+		if p[1] < width-1 {
+			npoint := point{p[0], p[1] + 1}
+			enqueue(npoint)
+		}
+
+	}
+	fmt.Println("memo", len(memo))
+	return bestcost
 }

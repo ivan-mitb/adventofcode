@@ -1211,7 +1211,7 @@ func Day15(part2 bool) int {
 		path []*node
 		cost int
 	}
-	in := func(path []*node, p point) bool {
+	_ = func(path []*node, p point) bool {
 		for _, n := range path {
 			if n.p == p {
 				return true
@@ -1219,70 +1219,49 @@ func Day15(part2 bool) int {
 		}
 		return false
 	}
+	end := point{height - 1, width - 1}
 	pos := point{0, 0}
-	frontier := []node{{pos, nil, 0}}
 	memo := map[point]int{}
-	bestcost := math.MaxInt
-	// DFS
-	for len(frontier) > 0 {
-		n := frontier[len(frontier)-1]
-		// println(len(frontier))
-		frontier = frontier[:len(frontier)-1]
-		p := n.p
-		if p[0] == height-1 && p[1] == width-1 {
-			// fmt.Println("found", n.cost)
-			// update memo with best costs at each point
-			totalcost := n.cost
-			for _, n := range n.path {
-				cost2dest := totalcost - n.cost
-				mcost, ok := memo[n.p]
-				if ok {
-					if cost2dest < mcost {
-						memo[n.p] = cost2dest
-					}
-				} else {
-					memo[n.p] = cost2dest
-				}
-			}
-			if totalcost < bestcost {
-				bestcost = totalcost
-			}
-			continue
+	// recursion
+	var r func(point, []point) int
+	r = func(p point, path []point) int {
+		if p == end {
+			return int(grid[p[0]][p[1]])
 		}
-		if in(n.path, p) {
-			// abandon already visited
-			continue
-		}
-		enqueue := func(np point) {
-			mcost, ok := memo[np]
-			if !ok {
-				mcost = int(grid[np[0]][np[1]])
-			}
-			// mcost = 0
-			cost := n.cost + mcost
-			if cost <= bestcost {
-				frontier = append(frontier,
-					node{np, append(n.path, &n), cost})
+		// return an incredibly high cost to ensure this path never gets trod
+		for _, pth := range path {
+			if pth == p {
+				return 9999999
 			}
 		}
+		if cost, ok := memo[p]; ok {
+			return cost
+		}
+		path = append(path, p)
+		childcosts := []int{}
 		if p[0] > 0 {
-			npoint := point{p[0] - 1, p[1]}
-			enqueue(npoint)
+			childcosts = append(childcosts, r(point{p[0] - 1, p[1]}, path))
 		}
 		if p[0] < height-1 {
-			npoint := point{p[0] + 1, p[1]}
-			enqueue(npoint)
+			childcosts = append(childcosts, r(point{p[0] + 1, p[1]}, path))
 		}
 		if p[1] > 0 {
-			npoint := point{p[0], p[1] - 1}
-			enqueue(npoint)
+			childcosts = append(childcosts, r(point{p[0], p[1] - 1}, path))
 		}
 		if p[1] < width-1 {
-			npoint := point{p[0], p[1] + 1}
-			enqueue(npoint)
+			childcosts = append(childcosts, r(point{p[0], p[1] + 1}, path))
 		}
-
+		min := 9999999
+		for _, c := range childcosts {
+			if c < min {
+				min = c
+			}
+		}
+		cost := min + int(grid[p[0]][p[1]])
+		memo[p] = cost
+		return cost
 	}
+	bestcost := r(pos, nil)
 	fmt.Println("memo", len(memo))
 	return bestcost
 }

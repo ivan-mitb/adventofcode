@@ -1261,15 +1261,12 @@ func Day15(part2 bool) int {
 			// abandon already visited
 			continue
 		}
-		newpath := make([]*node, len(n.path)+1)
-		copy(newpath, n.path)
-		newpath[len(n.path)] = &n
+		newpath := append(n.path, &n)
 		enqueue := func(np point) {
 			cost := n.cost + int(grid[np[0]][np[1]])
-			// if !in(n.path, np) && cost <= bestcost {
-			frontier = append(frontier,
-				node{np, newpath, cost})
-			// }
+			if !in(n.path, np) {
+				frontier = append(frontier, node{np, newpath, cost})
+			}
 		}
 		if p[0] > 0 {
 			npoint := point{p[0] - 1, p[1]}

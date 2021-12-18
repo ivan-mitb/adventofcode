@@ -1193,6 +1193,9 @@ func Day15(part2 bool) int {
 3125421639
 1293138521
 2311944581`)
+	// 	buf = aoc.Readstring(`131
+	// 131
+	// 111`)
 	// buf = aoc.Readfile("day15.txt")
 	height := len(buf)
 	width := len(buf[0])
@@ -1237,19 +1240,22 @@ func Day15(part2 bool) int {
 		if cost, ok := memo[p]; ok {
 			return cost
 		}
-		path = append(path, p)
+		// path = append(path, p)
+		newpath := make([]point, len(path)+1)
+		copy(newpath, path)
+		newpath[len(path)] = p
 		childcosts := []int{}
 		if p[0] > 0 {
-			childcosts = append(childcosts, r(point{p[0] - 1, p[1]}, path))
+			childcosts = append(childcosts, r(point{p[0] - 1, p[1]}, newpath))
 		}
 		if p[0] < height-1 {
-			childcosts = append(childcosts, r(point{p[0] + 1, p[1]}, path))
+			childcosts = append(childcosts, r(point{p[0] + 1, p[1]}, newpath))
 		}
 		if p[1] > 0 {
-			childcosts = append(childcosts, r(point{p[0], p[1] - 1}, path))
+			childcosts = append(childcosts, r(point{p[0], p[1] - 1}, newpath))
 		}
 		if p[1] < width-1 {
-			childcosts = append(childcosts, r(point{p[0], p[1] + 1}, path))
+			childcosts = append(childcosts, r(point{p[0], p[1] + 1}, newpath))
 		}
 		min := 9999999
 		for _, c := range childcosts {
@@ -1258,11 +1264,12 @@ func Day15(part2 bool) int {
 			}
 		}
 		cost := min + int(grid[p[0]][p[1]])
-		memo[p] = cost
+		if cost < 9999999 {
+			memo[p] = cost
+		}
 		return cost
 	}
 	bestcost := r(pos, nil)
-	fmt.Println("memo", len(memo))
 	return bestcost
 }
 

@@ -1211,14 +1211,6 @@ func Day15(part2 bool) int {
 		path []*node
 		cost int
 	}
-	in := func(path []*node, p point) bool {
-		for _, n := range path {
-			if n.p == p {
-				return true
-			}
-		}
-		return false
-	}
 	fcompact := func(f []node) []node {
 		m := make(map[point]node)
 		for _, n := range f {
@@ -1242,6 +1234,7 @@ func Day15(part2 bool) int {
 	pos := point{0, 0}
 	end := point{height - 1, width - 1}
 	frontier := []node{{pos, nil, 0}}
+	visited := make(map[point]bool)
 	bestcost := math.MaxInt
 	// UCS
 	for len(frontier) > 0 {
@@ -1257,14 +1250,15 @@ func Day15(part2 bool) int {
 			// in UCS the first is the shortest path :)
 			break
 		}
-		if in(n.path, p) {
+		if visited[p] {
 			// abandon already visited
 			continue
 		}
+		visited[p] = true
 		newpath := append(n.path, &n)
 		enqueue := func(np point) {
 			cost := n.cost + int(grid[np[0]][np[1]])
-			if !in(n.path, np) {
+			if !visited[np] {
 				frontier = append(frontier, node{np, newpath, cost})
 			}
 		}

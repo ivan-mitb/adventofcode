@@ -1182,6 +1182,7 @@ CN -> C`)
 	return max - min
 }
 
+// TODO: this would benefit from using a heap as frontier
 func Day15(part2 bool) int {
 	buf := aoc.Readstring(`1163751742
 1381373672
@@ -1269,11 +1270,12 @@ func Day15(part2 bool) int {
 			continue
 		}
 		visited[p] = true
-		newpath := append(n.path, &n)
+		// newpath := append(n.path, &n)
 		enqueue := func(np point) {
 			cost := n.cost + getgrid(np)
 			if !visited[np] {
-				frontier = append(frontier, node{np, newpath, cost})
+				// frontier = append(frontier, node{np, newpath, cost})
+				frontier = append(frontier, node{np, nil, cost})
 			}
 		}
 		if p[0] > 0 {

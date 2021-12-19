@@ -1231,8 +1231,22 @@ func Day15(part2 bool) int {
 		sort.Slice(s, func(i, j int) bool { return s[i].cost < s[j].cost })
 		return s
 	}
+	getgrid := func(p point) int {
+		if !part2 {
+			return int(grid[p[0]][p[1]])
+		} else {
+			tiley, offy := p[0]/height, p[0]%height
+			tilex, offx := p[1]/width, p[1]%width
+			n := int(grid[offy][offx])
+			n = ((n - 1 + tilex + tiley) % 9) + 1
+			return n
+		}
+	}
 	pos := point{0, 0}
 	end := point{height - 1, width - 1}
+	if part2 {
+		end = point{height*5 - 1, width*5 - 1}
+	}
 	frontier := []node{{pos, nil, 0}}
 	visited := make(map[point]bool)
 	bestcost := math.MaxInt
@@ -1257,7 +1271,7 @@ func Day15(part2 bool) int {
 		visited[p] = true
 		newpath := append(n.path, &n)
 		enqueue := func(np point) {
-			cost := n.cost + int(grid[np[0]][np[1]])
+			cost := n.cost + getgrid(np)
 			if !visited[np] {
 				frontier = append(frontier, node{np, newpath, cost})
 			}
@@ -1266,7 +1280,7 @@ func Day15(part2 bool) int {
 			npoint := point{p[0] - 1, p[1]}
 			enqueue(npoint)
 		}
-		if p[0] < height-1 {
+		if p[0] < end[0] {
 			npoint := point{p[0] + 1, p[1]}
 			enqueue(npoint)
 		}
@@ -1274,10 +1288,114 @@ func Day15(part2 bool) int {
 			npoint := point{p[0], p[1] - 1}
 			enqueue(npoint)
 		}
-		if p[1] < width-1 {
+		if p[1] < end[1] {
 			npoint := point{p[0], p[1] + 1}
 			enqueue(npoint)
 		}
 	}
 	return bestcost
+}
+
+func Day16(part2 bool) int {
+	return 0
+}
+
+func Day17(part2 bool) int {
+	buf := aoc.Readstring(`target area: x=20..30, y=-10..-5`)[0]
+	buf = aoc.Readfile("day17.txt")[0]
+	type point [2]int
+	x1, x2, y1, y2 := 0, 0, 0, 0
+	if n, err := fmt.Sscanf(buf, "target area: x=%d..%d, y=%d..%d", &x1, &x2, &y1, &y2); n != 4 {
+		log.Fatal(err)
+	}
+	update := func(pos point, vector point) (point, point) {
+		// each step:
+		// x += vx, y += vy
+		// vx = max(vx-1, 0)
+		// vy--
+		pos[0] += vector[0]
+		pos[1] += vector[1]
+		vector[0] = aoc.Max(vector[0]-1, 0)
+		vector[1]--
+		return pos, vector
+	}
+	intersect := func(pos point) bool {
+		res := 0
+		if pos[0] >= x1 {
+			res |= 1
+		}
+		if pos[0] <= x2 {
+			res |= 2
+		}
+		if pos[1] >= y1 {
+			res |= 4
+		}
+		if pos[1] <= y2 {
+			res |= 8
+		}
+		return res == 0xf
+	}
+	// return yhigh for this run, or -1 if no intersect
+	simulate := func(vec point) int {
+		yhigh := 0
+		pos := point{0, 0}
+		for !intersect(pos) {
+			// fmt.Printf("pos %v vec %v\n", pos, vec)
+			pos, vec = update(pos, vec)
+			if pos[1] > yhigh {
+				yhigh = pos[1]
+			}
+			if pos[0] > x2 || pos[1] < y1 {
+				// left the arena
+				return -1
+			}
+		}
+		return yhigh
+	}
+	// vec := point{6, 9}
+	vec := point{10, 0}
+	// find a horizontal vector that is a solution
+	yhigh := 0
+	count := 0
+	for x := 00; x < 600; x++ {
+		for y := -300; y < 600; y++ {
+			vec[0], vec[1] = x, y
+			n := simulate(vec)
+			if n >= 0 {
+				count++
+				// fmt.Println(vec, n)
+			}
+			if n > yhigh {
+				yhigh = n
+			}
+		}
+	}
+	if !part2 {
+		return yhigh
+	} else {
+		return count
+	}
+}
+
+func Day18(part2 bool) int {
+	type node struct {
+		left, right    int
+		lchild, rchild *node
+	}
+	mknode := func(x, y int) node {
+		return node{left: x, right: y}
+	}
+	addchild := func(n node, l, r *node) node {
+		n.lchild, n.rchild = l, r
+		return n
+	}
+	add := func(a, b node) node {
+		return node{lchild: &a, rchild: &b}
+	}
+	btree := mknode(1, 2)
+	n := mknode(3, 4)
+	fmt.Println(add(btree, n))
+	btree = addchild(btree, &n, nil)
+	fmt.Println(btree)
+	return 0
 }

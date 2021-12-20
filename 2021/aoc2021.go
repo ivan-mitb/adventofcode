@@ -1299,7 +1299,129 @@ func Day15(part2 bool) int {
 }
 
 func Day16(part2 bool) int {
-	return 0
+	// version, ID
+	// ID=4 literal int, padded then expanded to 5-bit groups (leading 1 except last)
+	// ID!=4 operator: length bit 0: 15 bit len; 1: 11 bit subpkt count
+	//					subpackets
+	ex := []string{`D2FE28`,
+		`38006F45291200`,
+		`EE00D40C823060`,
+		`8A004A801A8002F478`,
+		`620080001611562C8802118E34`,
+		`C0015000016115A2E0802F182340`,
+		`A0016C880162017C3686B18A3D4780`}
+	extract := func(b []byte, start, leng int) []byte {
+		off := start / 8
+		shift := start % 8
+		mask := []byte{0xff, 0x80, 0xc0, 0xe0, 0xf0, 0xf8, 0xfc, 0xfe}
+		res := make([]byte, (leng+7)/8)
+		for i := 0; i < len(res)-1; i++ {
+			if shift > 0 {
+				u16 := uint16(b[off+i])<<8 | uint16(b[off+i+1])
+				res[i] = uint8(u16 >> (8 - shift))
+				// res[i] = b[off+i]<<shift | (b[off+i+1]>>(8-shift))&mask[shift]
+			} else {
+				res[i] = b[off+i]
+			}
+		}
+		// last byte
+		if shift > 0 {
+			x := uint16(0)
+			if off+len(res) < len(b) {
+				x = uint16(b[off+len(res)])
+			}
+			u16 := uint16(b[off+len(res)-1])<<8 | x
+			res[len(res)-1] = uint8(u16>>(8-shift)) & mask[leng%8]
+		} else {
+			res[len(res)-1] = b[off+len(res)-1] & mask[leng%8]
+		}
+		return res
+	}
+	var parse func([]byte) (int, int)
+	// returns -1 if version = 0
+	parse = func(packet []byte) (bits, version int) {
+		version = (int(packet[0]) >> 5) & 7
+		id := (packet[0] >> 2) & 7
+		if version == 0 {
+			fmt.Println("version 0 packet", version, id)
+			// return -1, version
+		}
+		if id == 4 {
+			// literal
+			fmt.Print(version, id, " literal ")
+			done := false
+			off := 6
+			value := uint64(0)
+			for !done {
+				b := extract(packet, off, 5)[0] >> 3
+				off += 5
+				if b&0x10 == 0 {
+					done = true
+				}
+				b &= 0x0f
+				// fmt.Printf("%04b ", int(b))
+				value = (value << 4) | uint64(b)
+			}
+			println("=", value)
+			return off, version
+		} else {
+			// operator
+			ltype := packet[0] >> 1 & 1
+			if ltype == 0 {
+				// 15 bit subpacket bitlen
+				n := uint16(packet[1])<<8 | uint16(packet[2])
+				n >>= 2
+				if packet[0]&1 > 0 {
+					n |= 0x4000
+				}
+				fmt.Println(version, id, "type", ltype, "subpacket bitlen", n)
+				start := 15 + 7
+				for start < int(n)+15+7 {
+					fmt.Println("  subpacket")
+					b, v := parse(extract(packet, start, len(packet)*8-start))
+					start += b
+					version += v
+				}
+				return start, version
+			} else {
+				// 11 bit subpacket count
+				n := uint16(packet[1])<<8 | uint16(packet[2])
+				n >>= 6
+				if packet[0]&1 > 0 {
+					n |= 0x0400
+				}
+				fmt.Println(version, id, "type", ltype, "subpacket count", n)
+				start := 11 + 7
+				for i := 0; i < int(n); i++ {
+					fmt.Println("  subpacket", i+1)
+					b, v := parse(extract(packet, start, len(packet)*8-start))
+					start += b
+					version += v
+				}
+				return start, version
+			}
+		}
+		return 0, version
+	}
+	buf := ex[4]
+	buf = aoc.Readfile("day16.txt")[0]
+	// ingest
+	input := make([]byte, len(buf)/2)
+	for i := 0; i < len(input); i++ {
+		n := buf[i<<1] - byte('0')
+		if n > 9 {
+			n -= 7
+		}
+		m := buf[i<<1+1] - byte('0')
+		if m > 9 {
+			m -= 7
+		}
+		input[i] = n<<4 | m
+	}
+	fmt.Println(buf[:6])
+	_, versionsum := parse(extract(input, 0, len(input)*8))
+	fmt.Println("version sum", versionsum)
+	return versionsum
 }
 
 func Day17(part2 bool) int {

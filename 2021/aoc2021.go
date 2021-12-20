@@ -1310,6 +1310,15 @@ func Day16(part2 bool) int {
 		`620080001611562C8802118E34`,
 		`C0015000016115A2E0802F182340`,
 		`A0016C880162017C3686B18A3D4780`}
+	ex2 := []string{
+		`C200B40A82`,
+		`04005AC33890`,
+		`880086C3E88112`,
+		`CE00C43D881120`,
+		`D8005AC2A8F0`,
+		`F600BC2D8F`,
+		`9C005AC2F8F0`,
+		`9C0141080250320F1802104A08`}
 	extract := func(b []byte, start, leng int) []byte {
 		off := start / 8
 		shift := start % 8
@@ -1337,21 +1346,16 @@ func Day16(part2 bool) int {
 		}
 		return res
 	}
-	var parse func([]byte) (int, int)
-	// returns -1 if version = 0
-	parse = func(packet []byte) (bits, version int) {
+	var evalpacket func([]byte) (int, int, uint)
+	// recursively evaluates a packet and its subpackets
+	evalpacket = func(packet []byte) (bits, version int, value uint) {
 		version = (int(packet[0]) >> 5) & 7
 		id := (packet[0] >> 2) & 7
-		if version == 0 {
-			fmt.Println("version 0 packet", version, id)
-			// return -1, version
-		}
 		if id == 4 {
 			// literal
-			fmt.Print(version, id, " literal ")
 			done := false
 			off := 6
-			value := uint64(0)
+			value = uint(0)
 			for !done {
 				b := extract(packet, off, 5)[0] >> 3
 				off += 5
@@ -1359,69 +1363,115 @@ func Day16(part2 bool) int {
 					done = true
 				}
 				b &= 0x0f
-				// fmt.Printf("%04b ", int(b))
-				value = (value << 4) | uint64(b)
+				value = (value << 4) | uint(b)
 			}
-			println("=", value)
-			return off, version
+			return off, version, value
+		}
+		ltype := packet[0] >> 1 & 1
+		start := 0
+		vals := []uint{}
+		if ltype == 0 {
+			// 15 bit subpacket bitlen
+			n := uint16(packet[1])<<8 | uint16(packet[2])
+			n >>= 2
+			if packet[0]&1 > 0 {
+				n |= 0x4000
+			}
+			// fmt.Println(version, id, "type", ltype, "subpacket bitlen", n)
+			start = 15 + 7
+			for start < int(n)+15+7 {
+				b, v, vl := evalpacket(extract(packet, start, len(packet)*8-start))
+				start += b
+				version += v
+				vals = append(vals, vl)
+			}
 		} else {
-			// operator
-			ltype := packet[0] >> 1 & 1
-			if ltype == 0 {
-				// 15 bit subpacket bitlen
-				n := uint16(packet[1])<<8 | uint16(packet[2])
-				n >>= 2
-				if packet[0]&1 > 0 {
-					n |= 0x4000
-				}
-				fmt.Println(version, id, "type", ltype, "subpacket bitlen", n)
-				start := 15 + 7
-				for start < int(n)+15+7 {
-					fmt.Println("  subpacket")
-					b, v := parse(extract(packet, start, len(packet)*8-start))
-					start += b
-					version += v
-				}
-				return start, version
-			} else {
-				// 11 bit subpacket count
-				n := uint16(packet[1])<<8 | uint16(packet[2])
-				n >>= 6
-				if packet[0]&1 > 0 {
-					n |= 0x0400
-				}
-				fmt.Println(version, id, "type", ltype, "subpacket count", n)
-				start := 11 + 7
-				for i := 0; i < int(n); i++ {
-					fmt.Println("  subpacket", i+1)
-					b, v := parse(extract(packet, start, len(packet)*8-start))
-					start += b
-					version += v
-				}
-				return start, version
+			// 11 bit subpacket count
+			n := uint16(packet[1])<<8 | uint16(packet[2])
+			n >>= 6
+			if packet[0]&1 > 0 {
+				n |= 0x0400
+			}
+			// fmt.Println(version, id, "type", ltype, "subpacket count", n)
+			start = 11 + 7
+			for i := 0; i < int(n); i++ {
+				b, v, vl := evalpacket(extract(packet, start, len(packet)*8-start))
+				start += b
+				version += v
+				vals = append(vals, vl)
 			}
 		}
-		return 0, version
+		if !part2 {
+			return start, version, 0
+		}
+		switch id {
+		case 0: // sum
+			for _, v := range vals {
+				value += v
+			}
+		case 1: // product
+			value = 1
+			for _, v := range vals {
+				value *= v
+			}
+		case 2: // minimum
+			min := uint(math.MaxUint)
+			for _, v := range vals {
+				if v < min {
+					min = v
+				}
+			}
+			value = min
+		case 3: // maximum
+			max := uint(0)
+			for _, v := range vals {
+				if v > max {
+					max = v
+				}
+			}
+			value = max
+		case 5: // greater than
+			if vals[0] > vals[1] {
+				value = 1
+			}
+		case 6: // less than
+			if vals[0] < vals[1] {
+				value = 1
+			}
+		case 7: // equal to
+			if vals[0] == vals[1] {
+				value = 1
+			}
+		}
+		return start, version, value
 	}
 	buf := ex[4]
+	buf = ex2[0]
 	buf = aoc.Readfile("day16.txt")[0]
-	// ingest
-	input := make([]byte, len(buf)/2)
-	for i := 0; i < len(input); i++ {
-		n := buf[i<<1] - byte('0')
-		if n > 9 {
-			n -= 7
+	work := func(buf string) int {
+		// ingest
+		input := make([]byte, len(buf)/2)
+		for i := 0; i < len(input); i++ {
+			n := buf[i<<1] - byte('0')
+			if n > 9 {
+				n -= 7
+			}
+			m := buf[i<<1+1] - byte('0')
+			if m > 9 {
+				m -= 7
+			}
+			input[i] = n<<4 | m
 		}
-		m := buf[i<<1+1] - byte('0')
-		if m > 9 {
-			m -= 7
+		_, versionsum, value := evalpacket(extract(input, 0, len(input)*8))
+		if !part2 {
+			fmt.Println("version sum", versionsum)
+			return versionsum
+		} else {
+			fmt.Println("value", value)
+			return int(value)
 		}
-		input[i] = n<<4 | m
 	}
-	fmt.Println(buf[:6])
-	_, versionsum := parse(extract(input, 0, len(input)*8))
-	fmt.Println("version sum", versionsum)
-	return versionsum
+	return work(buf)
 }
 
 func Day17(part2 bool) int {

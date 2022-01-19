@@ -6,6 +6,7 @@ import (
 	"bufio"
 	"log"
 	"os"
+	"sort"
 	"strings"
 )
 
@@ -33,6 +34,8 @@ func Readstring(s string) (buf []string) {
 }
 
 func Setdiff(a, b []byte) (res []byte) {
+	sort.Slice(a, func(i, j int) bool { return a[i] < a[j] })
+	sort.Slice(b, func(i, j int) bool { return b[i] < b[j] })
 	i, j := 0, 0
 	for i < len(a) && j < len(b) {
 		if a[i] == b[j] {
@@ -58,6 +61,64 @@ func Setdiff(a, b []byte) (res []byte) {
 func Setunion(a, b []byte) []byte {
 	res := []byte{}
 	i, j := 0, 0
+	for {
+		if i < len(a) && j < len(b) {
+			if a[i] == b[j] {
+				res = append(res, a[i])
+				i++
+				j++
+			} else if a[i] < b[j] {
+				res = append(res, a[i])
+				i++
+			} else {
+				res = append(res, b[j])
+				j++
+			}
+		} else {
+			if i < len(a) {
+				res = append(res, a[i:]...)
+			} else if j < len(b) {
+				res = append(res, b[j:]...)
+			}
+			break
+		}
+	}
+	return res
+}
+
+func Setintersect(a, b []int) []int {
+	return nil
+}
+
+func SetdiffInt(a, b []int) (res []int) {
+	i, j := 0, 0
+	sort.Slice(a, func(i, j int) bool { return a[i] < a[j] })
+	sort.Slice(b, func(i, j int) bool { return b[i] < b[j] })
+	for i < len(a) && j < len(b) {
+		if a[i] == b[j] {
+			i++
+			j++
+			continue
+		}
+		if a[i] < b[j] {
+			res = append(res, a[i])
+			i++
+			continue
+		}
+		if a[i] >= b[j] {
+			j++
+		}
+	}
+	if i < len(a) {
+		res = append(res, a[i:]...)
+	}
+	return res
+}
+
+func SetunionInt(a, b []int) (res []int) {
+	i, j := 0, 0
+	sort.Slice(a, func(i, j int) bool { return a[i] < a[j] })
+	sort.Slice(b, func(i, j int) bool { return b[i] < b[j] })
 	for {
 		if i < len(a) && j < len(b) {
 			if a[i] == b[j] {

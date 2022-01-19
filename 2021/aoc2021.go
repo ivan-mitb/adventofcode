@@ -1,7 +1,7 @@
 package aoc2021
 
 import (
-	"aoc"
+	. "aoc"
 	"bytes"
 	"fmt"
 	"image"
@@ -16,7 +16,7 @@ import (
 )
 
 func Day1(part2 bool) int {
-	buf := aoc.Readfile("day1.txt")
+	buf := Readfile("day1.txt")
 	// buf = []string{"199",
 	// 	"200",
 	// 	"208",
@@ -67,7 +67,7 @@ func Day1(part2 bool) int {
 }
 
 func Day2(part2 bool) int {
-	buf := aoc.Readfile("day2.txt")
+	buf := Readfile("day2.txt")
 	pos, depth, aim := 0, 0, 0
 	if !part2 {
 		for _, s := range buf {
@@ -104,7 +104,7 @@ func Day2(part2 bool) int {
 }
 
 func Day3(part2 bool) int {
-	buf := aoc.Readfile("day3.txt")
+	buf := Readfile("day3.txt")
 	// buf = strings.Fields(`00100
 	// 11110
 	// 10110
@@ -200,7 +200,7 @@ func Day3(part2 bool) int {
 }
 
 func Day4(part2 bool) int {
-	buf := aoc.Readfile("day4.txt")
+	buf := Readfile("day4.txt")
 	// 	buf := strings.Split(`7,4,9,5,11,17,23,2,0,14,21,24,10,16,13,6,15,25,12,22,18,20,8,19,3,26,1
 
 	// 22 13 17 11  0
@@ -291,7 +291,7 @@ func Day4(part2 bool) int {
 }
 
 func Day5(part2 bool) int {
-	buf := aoc.Readfile("day5.txt")
+	buf := Readfile("day5.txt")
 	// 	buf := strings.Split(`0,9 -> 5,9
 	// 8,0 -> 0,8
 	// 9,4 -> 3,4
@@ -361,7 +361,7 @@ func Day5(part2 bool) int {
 }
 
 func Day6(part2 bool) int {
-	buf := aoc.Readfile("day6.txt")
+	buf := Readfile("day6.txt")
 	// buf := []string{`3,4,3,1,2`}
 	s := strings.Split(buf[0], ",")
 	fish := make([]int, 10)
@@ -391,7 +391,7 @@ func Day6(part2 bool) int {
 }
 
 func Day7(part2 bool) int {
-	buf := aoc.Readfile("day7.txt")
+	buf := Readfile("day7.txt")
 	// buf := []string{`16,1,2,0,4,2,7,1,2,14`}
 	s := strings.Split(buf[0], ",")
 	// min, mean, max
@@ -442,7 +442,7 @@ func Day7(part2 bool) int {
 }
 
 func Day8(part2 bool) int {
-	buf := aoc.Readfile("day8.txt")
+	buf := Readfile("day8.txt")
 	// `acedgfb cdfbe gcdfa fbcad dab cefabd cdfgeb eafb cagedb ab | cdfeb fcadb cdfeb cdbaf`
 	// buf := strings.Split(
 	// 	`be cfbegad cbdgef fgaecd cgeb fdcge agebfd fecdb fabcd edb | fdgacbe cefdb cefbgd gcbe
@@ -505,16 +505,16 @@ func Day8(part2 bool) int {
 					cf = j
 				case 3: // '7'
 					savedigit(j, 7)
-					a = aoc.Setdiff(j, cf)
+					a = Setdiff(j, cf)
 				case 4: // '4'
 					savedigit(j, 4)
-					bd = aoc.Setdiff(j, cf)
+					bd = Setdiff(j, cf)
 				case 5: // '235'
-					abdcf := aoc.Setunion(a, aoc.Setunion(bd, cf))
-					x := aoc.Setdiff(j, abdcf)
+					abdcf := Setunion(a, Setunion(bd, cf))
+					x := Setdiff(j, abdcf)
 					if len(x) == 1 {
 						// g = x
-						if len(aoc.Setdiff(cf, j)) == 1 {
+						if len(Setdiff(cf, j)) == 1 {
 							// '5'
 							savedigit(j, 5)
 						} else {
@@ -526,10 +526,10 @@ func Day8(part2 bool) int {
 						savedigit(j, 2)
 					}
 				case 6: // '0' 6 9
-					if len(aoc.Setdiff(bd, j)) > 0 {
+					if len(Setdiff(bd, j)) > 0 {
 						savedigit(j, 0)
 					} else {
-						if len(aoc.Setdiff(cf, j)) == 1 {
+						if len(Setdiff(cf, j)) == 1 {
 							savedigit(j, 6)
 						} else {
 							savedigit(j, 9)
@@ -556,7 +556,7 @@ func Day8(part2 bool) int {
 }
 
 func Day9(part2 bool) int {
-	buf := aoc.Readfile("day9.txt")
+	buf := Readfile("day9.txt")
 	// 	buf := strings.Split(`2199943210
 	// 3987894921
 	// 9856789892
@@ -677,7 +677,7 @@ func Day10(part2 bool) int {
 [<(<(<(<{}))><([]([]()
 <{([([[(<>()){}]>(<<{{
 <{([{{}}[<[[[<>{}]]]>[]]`, "\n")
-	buf = aoc.Readfile("day10.txt")
+	buf = Readfile("day10.txt")
 	push := func(st []byte, b byte) []byte {
 		return append([]byte{b}, st...)
 	}
@@ -769,7 +769,7 @@ func Day11(part2 bool) int {
 	   19991
 	   11111`, "\n")
 	*/
-	buf = aoc.Readfile("day11.txt")
+	buf = Readfile("day11.txt")
 	height := len(buf)
 	width := len(buf[0])
 	type octo struct {
@@ -788,10 +788,10 @@ func Day11(part2 bool) int {
 	// main loop
 	var boost func([][]octo, int, int)
 	boost_neighbours := func(p [][]octo, i, j int) {
-		x1 := aoc.Max(0, i-1)
-		x2 := aoc.Min(height-1, i+1)
-		y1 := aoc.Max(0, j-1)
-		y2 := aoc.Min(width-1, j+1)
+		x1 := Max(0, i-1)
+		x2 := Min(height-1, i+1)
+		y1 := Max(0, j-1)
+		y2 := Min(width-1, j+1)
 		for x := x1; x <= x2; x++ {
 			for y := y1; y <= y2; y++ {
 				boost(p, x, y)
@@ -931,7 +931,7 @@ b-end`, "\n")
 	}
 	// ----start----
 	// buf = ex3
-	buf = aoc.Readfile("day12.txt")
+	buf = Readfile("day12.txt")
 	x := len(ex2) + len(ex3)
 	for _, s := range buf {
 		s := strings.Split(s, "-")
@@ -970,7 +970,7 @@ b-end`, "\n")
 
 // bonus: output to PNG !
 func Day13(part2 bool) int {
-	buf := aoc.Readstring(`6,10
+	buf := Readstring(`6,10
 0,14
 9,10
 0,3
@@ -991,7 +991,7 @@ func Day13(part2 bool) int {
 
 fold along y=7
 fold along x=5`)
-	buf = aoc.Readfile("day13.txt")
+	buf = Readfile("day13.txt")
 	type point [2]int
 	width, height := 0, 0
 	dots := []point{}
@@ -1118,7 +1118,7 @@ fold along x=5`)
 }
 
 func Day14(part2 bool) int {
-	buf := aoc.Readstring(`NNCB
+	buf := Readstring(`NNCB
 
 CH -> B
 HH -> N
@@ -1136,7 +1136,7 @@ BB -> N
 BC -> B
 CC -> N
 CN -> C`)
-	buf = aoc.Readfile("day14.txt")
+	buf = Readfile("day14.txt")
 	template := buf[0]
 	rules := map[string][]string{}
 	for _, s := range buf[2:] {
@@ -1184,7 +1184,7 @@ CN -> C`)
 
 // TODO: this would benefit from using a heap as frontier
 func Day15(part2 bool) int {
-	buf := aoc.Readstring(`1163751742
+	buf := Readstring(`1163751742
 1381373672
 2136511328
 3694931569
@@ -1194,7 +1194,7 @@ func Day15(part2 bool) int {
 3125421639
 1293138521
 2311944581`)
-	buf = aoc.Readfile("day15.txt")
+	buf = Readfile("day15.txt")
 	height := len(buf)
 	width := len(buf[0])
 	grid := make([][]uint8, height)
@@ -1447,7 +1447,7 @@ func Day16(part2 bool) int {
 	}
 	buf := ex[4]
 	buf = ex2[0]
-	buf = aoc.Readfile("day16.txt")[0]
+	buf = Readfile("day16.txt")[0]
 	work := func(buf string) int {
 		// ingest
 		input := make([]byte, len(buf)/2)
@@ -1464,10 +1464,8 @@ func Day16(part2 bool) int {
 		}
 		_, versionsum, value := evalpacket(extract(input, 0, len(input)*8))
 		if !part2 {
-			fmt.Println("version sum", versionsum)
 			return versionsum
 		} else {
-			fmt.Println("value", value)
 			return int(value)
 		}
 	}
@@ -1475,8 +1473,8 @@ func Day16(part2 bool) int {
 }
 
 func Day17(part2 bool) int {
-	buf := aoc.Readstring(`target area: x=20..30, y=-10..-5`)[0]
-	buf = aoc.Readfile("day17.txt")[0]
+	buf := Readstring(`target area: x=20..30, y=-10..-5`)[0]
+	buf = Readfile("day17.txt")[0]
 	type point [2]int
 	x1, x2, y1, y2 := 0, 0, 0, 0
 	if n, err := fmt.Sscanf(buf, "target area: x=%d..%d, y=%d..%d", &x1, &x2, &y1, &y2); n != 4 {
@@ -1489,7 +1487,7 @@ func Day17(part2 bool) int {
 		// vy--
 		pos[0] += vector[0]
 		pos[1] += vector[1]
-		vector[0] = aoc.Max(vector[0]-1, 0)
+		vector[0] = Max(vector[0]-1, 0)
 		vector[1]--
 		return pos, vector
 	}
@@ -1566,10 +1564,761 @@ func Day18(part2 bool) int {
 	add := func(a, b node) node {
 		return node{lchild: &a, rchild: &b}
 	}
+	/*
+			buf := Readstring(`[1,2]
+		[[1,2],3]
+		[9,[8,7]]
+		[[1,9],[8,5]]
+		[[[[1,2],[3,4]],[[5,6],[7,8]]],9]
+		[[[9,[3,8]],[[0,9],6]],[[[3,7],[4,9]],3]]
+		[[[[1,3],[5,3]],[[1,3],[8,7]]],[[[4,9],[6,9]],[[8,2],[7,3]]]]`)
+			// ingest
+			parse := func(s string) {
+
+			}
+	*/
 	btree := mknode(1, 2)
 	n := mknode(3, 4)
 	fmt.Println(add(btree, n))
 	btree = addchild(btree, &n, nil)
 	fmt.Println(btree)
+	return 0
+}
+
+func Day19(part2 bool) int {
+	buf := Readstring(`--- scanner 0 ---
+404,-588,-901
+528,-643,409
+-838,591,734
+390,-675,-793
+-537,-823,-458
+-485,-357,347
+-345,-311,381
+-661,-816,-575
+-876,649,763
+-618,-824,-621
+553,345,-567
+474,580,667
+-447,-329,318
+-584,868,-557
+544,-627,-890
+564,392,-477
+455,729,728
+-892,524,684
+-689,845,-530
+423,-701,434
+7,-33,-71
+630,319,-379
+443,580,662
+-789,900,-551
+459,-707,401
+
+--- scanner 1 ---
+686,422,578
+605,423,415
+515,917,-361
+-336,658,858
+95,138,22
+-476,619,847
+-340,-569,-846
+567,-361,727
+-460,603,-452
+669,-402,600
+729,430,532
+-500,-761,534
+-322,571,750
+-466,-666,-811
+-429,-592,574
+-355,545,-477
+703,-491,-529
+-328,-685,520
+413,935,-424
+-391,539,-444
+586,-435,557
+-364,-763,-893
+807,-499,-711
+755,-354,-619
+553,889,-390
+
+--- scanner 2 ---
+649,640,665
+682,-795,504
+-784,533,-524
+-644,584,-595
+-588,-843,648
+-30,6,44
+-674,560,763
+500,723,-460
+609,671,-379
+-555,-800,653
+-675,-892,-343
+697,-426,-610
+578,704,681
+493,664,-388
+-671,-858,530
+-667,343,800
+571,-461,-707
+-138,-166,112
+-889,563,-600
+646,-828,498
+640,759,510
+-630,509,768
+-681,-892,-333
+673,-379,-804
+-742,-814,-386
+577,-820,562
+
+--- scanner 3 ---
+-589,542,597
+605,-692,669
+-500,565,-823
+-660,373,557
+-458,-679,-417
+-488,449,543
+-626,468,-788
+338,-750,-386
+528,-832,-391
+562,-778,733
+-938,-730,414
+543,643,-506
+-524,371,-870
+407,773,750
+-104,29,83
+378,-903,-323
+-778,-728,485
+426,699,580
+-438,-605,-362
+-469,-447,-387
+509,732,623
+647,635,-688
+-868,-804,481
+614,-800,639
+595,780,-596
+
+--- scanner 4 ---
+727,592,562
+-293,-554,779
+441,611,-461
+-714,465,-776
+-743,427,-804
+-660,-479,-426
+832,-632,460
+927,-485,-438
+408,393,-506
+466,436,-512
+110,16,151
+-258,-428,682
+-393,719,612
+-211,-452,876
+808,-476,-593
+-575,615,604
+-485,667,467
+-680,325,-822
+-627,-443,-432
+872,-547,-609
+833,512,582
+807,604,487
+839,-516,451
+891,-625,532
+-652,-548,-490
+30,-46,-14`)
+	buf = Readfile("day19.txt")
+	type point [3]int
+	type scanner struct {
+		id         int
+		pings      []point
+		dist       map[int][]point
+		relativeto *scanner
+		rot, off   point
+		parent     *scanner
+		children   []*scanner
+	}
+	ingest := func() []scanner {
+		scanners := []scanner{}
+		pings := []point{}
+		i := 0
+		for _, s := range buf {
+			n, _ := fmt.Sscanf(s, "--- scanner %d ---", &i)
+			if n == 1 {
+				if i > 0 {
+					scanners = append(scanners,
+						scanner{id: i - 1, pings: pings, dist: nil})
+					pings = []point{}
+				}
+				continue
+			}
+			x, y, z := 0, 0, 0
+			n, _ = fmt.Sscanf(s, "%d,%d,%d", &x, &y, &z)
+			if n == 3 {
+				pings = append(pings, point{x, y, z})
+			}
+		}
+		scanners = append(scanners, scanner{id: i, pings: pings, dist: nil})
+		return scanners
+	}
+	// dist matrix
+	distance := func(p []point, method string) map[int][]point {
+		m := map[int][]point{}
+		sq := func(x int) int { return x * x }
+		if method == "manhattan" {
+			sq = func(x int) int {
+				if x < 0 {
+					return -x
+				}
+				return x
+			}
+		}
+		for i := 0; i < len(p)-1; i++ {
+			for j := i + 1; j < len(p); j++ {
+				d := sq(p[i][0]-p[j][0]) + sq(p[i][1]-p[j][1]) + sq(p[i][2]-p[j][2])
+				// crazy non-unique dist exist
+				m[d] = append(m[d], []point{p[i], p[j]}...)
+			}
+		}
+		return m
+	}
+	Z := point{0, 0, 0}
+	vecdiff := func(p, q point) point { return point{p[0] - q[0], p[1] - q[1], p[2] - q[2]} }
+	vecmul := func(p, q point) point { return point{p[0] * q[0], p[1] * q[1], p[2] * q[2]} }
+	// vecadd := func(p, q point) point { return point{p[0] + q[0], p[1] + q[1], p[2] + q[2]} }
+	xmat := []point{
+		{1, 2, 3}, {2, -1, 3}, {-1, -2, 3}, {-2, 1, 3},
+		{-1, 2, -3}, {-2, -1, -3}, {1, -2, -3}, {2, 1, -3},
+		{-3, 2, 1}, {-3, -1, 2}, {-3, -2, -1}, {-3, 1, -2},
+		{3, 2, -1}, {3, -1, -2}, {3, -2, 1}, {3, 1, 2},
+		{1, -3, 2}, {2, -3, -1}, {-1, -3, -2}, {-2, -3, 1},
+		{1, 3, -2}, {2, 3, 1}, {-1, 3, 2}, {-2, 3, -1},
+	}
+	transform := func(p, xmat point) point {
+		if xmat == Z {
+			return p
+		}
+		m := point{}
+		sign := point{1, 1, 1}
+		for i := range m {
+			m[i] = xmat[i]
+			if m[i] < 0 {
+				sign[i] = -1
+				m[i] = -m[i]
+			}
+			m[i]--
+		}
+		r := point{p[m[0]], p[m[1]], p[m[2]]}
+		r = vecmul(r, sign)
+		return r
+	}
+
+	originalScanners := ingest()
+	scanners := originalScanners
+	autoinc := 40
+
+	for len(scanners) > 1 {
+		for i := range scanners {
+			scanners[i].dist = distance(scanners[i].pings, "manhattan")
+		}
+
+		// given a list of common distances, look up the pointpairs and
+		// work out the orientation vector and offset (from j to i)
+		findOrientation := func(i, j int, I []int) (rot, off point, ok bool) {
+			// d := I[0]
+			try := func(v1, v2 point) (res point) {
+				// transform v2 to match v1
+				for j := range xmat {
+					r := transform(v2, xmat[j])
+					rv1 := point{-v1[0], -v1[1], -v1[2]} // reversed
+					if vecdiff(v1, r) == Z || vecdiff(rv1, r) == Z {
+						// fmt.Println("rot match", xmat[j], v1, v2)
+						return xmat[j]
+					}
+				}
+				// fmt.Println("no rot match")
+				return res
+			}
+			// returns modal candidate
+			best := func(candidates map[point]int) point {
+				n := 0
+				rot := point{}
+				for k, v := range candidates {
+					if v > n {
+						rot = k
+						n = v
+					}
+				}
+				return rot
+			}
+			// returns the offset between the scanners' centres
+			checkAlignment := func(rot point) point {
+				count := 0
+				off := map[point]int{}
+				for _, d := range I {
+					d1 := scanners[i].dist[d]
+					d2 := scanners[j].dist[d]
+					v1 := vecdiff(d1[0], d1[1])
+					rv1 := vecdiff(d1[1], d1[0])
+					d2[0] = transform(d2[0], rot)
+					d2[1] = transform(d2[1], rot)
+					v2 := vecdiff(d2[0], d2[1])
+					if vecdiff(v2, v1) == Z {
+						off[vecdiff(d2[0], d1[0])]++
+						count++
+					} else if vecdiff(v2, rv1) == Z {
+						off[vecdiff(d2[1], d1[0])]++
+						count++
+					}
+				}
+				// fmt.Printf("aligned %d/%d\n  %v\n", count, len(I), off)
+				for k := range off {
+					return k
+				}
+				return point{}
+			}
+			// --------
+			candidates := map[point]int{}
+			for _, d := range I {
+				d1 := scanners[i].dist[d]
+				d2 := scanners[j].dist[d]
+				// v1 := vecdiff(d1[0], d1[1])
+				// v2 := vecdiff(d2[0], d2[1])
+				p := 0
+				for p < len(d1) {
+					v1 := vecdiff(d1[p], d1[p+1])
+					p += 2
+					q := 0
+					for q < len(d2) {
+						v2 := vecdiff(d2[q], d2[q+1])
+						q += 2
+						if t := try(v1, v2); t != Z {
+							candidates[t]++
+						}
+					}
+				}
+			}
+			rot = best(candidates)
+			if rot == Z {
+				// fmt.Printf("%d-%d no candidates!\n", i, j)
+				// fmt.Println(I)
+				// fmt.Println(candidates)
+				return rot, off, false
+			}
+			// check that all of j's pointpairs match i's after rot & translation
+			off = checkAlignment(rot)
+			// fmt.Println(i, j, "chose", rot, off, "from", candidates)
+			return rot, off, true
+		}
+
+		// identify scanner-pairs that have common pointpairs, and figure out the transform
+		findGroups := func() [][2]int {
+			res := [][2]int{}
+			for i := range scanners {
+				x := []int{}
+				for k := range scanners[i].dist {
+					x = append(x, k)
+				}
+				for j := i + 1; j < len(scanners); j++ {
+					if scanners[j].relativeto != nil {
+						continue
+					}
+					y := []int{}
+					for k := range scanners[j].dist {
+						y = append(y, k)
+					}
+					// intersect = union - setdiff(x,y) - setdiff(y,x)
+					U := SetunionInt(x, y)
+					Dleft := SetdiffInt(x, y)
+					Dright := SetdiffInt(y, x)
+					I := SetdiffInt(U, SetunionInt(Dleft, Dright))
+					// find the orientation vector & offset using pointpairs common to both
+					if len(I) > 11 {
+						if rot, off, ok := findOrientation(i, j, I); ok {
+							res = append(res, [2]int{i, j})
+							scanners[j].relativeto = &scanners[i]
+							scanners[j].rot = rot
+							scanners[j].off = off
+						}
+					}
+				}
+			}
+			return res
+		}
+		findGroups()
+
+		/*
+			println("scanner children rot off")
+			for _, s := range scanners {
+				fmt.Println(s.id, len(s.children), s.rot, s.off)
+			}
+			println()
+		*/
+		// transform each scanner's pings
+		g := map[*scanner][]*scanner{} // use a graph to collect the pieces
+		for i := range scanners {
+			s := &scanners[i]
+			relto := s.relativeto
+			rot, off := s.rot, s.off
+			if relto == nil {
+				g[s] = []*scanner{s}
+				continue
+			}
+			var last *scanner = nil
+			for relto != nil {
+				for j, p := range s.pings {
+					s.pings[j] = vecdiff(transform(p, rot), off)
+				}
+				rot = relto.rot
+				off = relto.off
+				last = relto
+				relto = relto.relativeto
+			}
+			g[last] = append(g[last], s)
+		}
+		// fmt.Println("graph", g)
+		// fuse scanners together, then rinse and repeat
+		// build up the scanner tree for part2
+		fuse := func(g map[*scanner][]*scanner) []scanner {
+			x := make([]*scanner, len(g))
+			i := 0
+			for k := range g {
+				x[i] = k
+				i++
+			}
+			sort.Slice(x, func(i, j int) bool { return x[i].id < x[j].id })
+			scan2 := []scanner{}
+			for _, v := range x {
+				pings := map[point]bool{}
+				children := []*scanner{}
+				// fmt.Printf("fuse %d - ", autoinc)
+				newscanner := scanner{id: autoinc, dist: map[int][]point{}}
+				autoinc++
+				for _, s := range g[v] {
+					// fmt.Printf("%d ", s.id)
+					s.parent = &newscanner
+					children = append(children, s)
+					for _, p := range s.pings {
+						pings[p] = true
+					}
+				}
+				// println()
+				pslice := make([]point, len(pings))
+				i := 0
+				for p := range pings {
+					pslice[i] = p
+					i++
+				}
+				newscanner.children = children
+				newscanner.pings = pslice
+				scan2 = append(scan2, newscanner)
+			}
+			return scan2
+		}
+		scanners = fuse(g)
+	}
+
+	if !part2 {
+		return len(scanners[0].pings)
+	} else {
+		scannerpos := make([]point, len(originalScanners))
+		i := 0
+		type node struct {
+			scanner
+			xform [][2]point
+		}
+		frontier := []node{{scanners[0], [][2]point{}}}
+		for len(frontier) > 0 {
+			n := frontier[len(frontier)-1]
+			frontier = frontier[:len(frontier)-1]
+			if len(n.children) == 0 {
+				relto := &n.scanner
+				p := point{}
+				for {
+					p = vecdiff(transform(p, relto.rot), relto.off)
+					relto = relto.relativeto
+					if relto == nil {
+						break
+					}
+				}
+				for _, x := range n.xform {
+					p = vecdiff(transform(p, x[0]), x[1])
+				}
+				scannerpos[n.id] = p
+				i++
+				continue
+			}
+			x := make([][2]point, len(n.xform)+1)
+			copy(x[1:], n.xform)
+			x[0] = [2]point{n.rot, n.off}
+			for _, c := range n.children {
+				frontier = append(frontier, node{*c, x})
+			}
+		}
+		// manhattan distance
+		max := 0
+		for d := range distance(scannerpos, "manhattan") {
+			if d > max {
+				max = d
+			}
+		}
+		return max
+	}
+	return 0
+}
+
+func Day20(part2 bool) int {
+	return 0
+}
+
+func Day21(part2 bool) int {
+	buf := Readstring(`Player 1 starting position: 4
+Player 2 starting position: 8`)
+	// buf = Readfile("day21.txt")
+	pos := [2]int{}
+	pos[0], _ = strconv.Atoi(strings.Fields(buf[0])[4])
+	pos[1], _ = strconv.Atoi(strings.Fields(buf[1])[4])
+	rollcount := 0
+	score := [2]int{}
+	die := 1
+	for {
+		// p1 roll 3x
+		x := 0
+		for i := 0; i < 3; i++ {
+			x += die
+			die = (die % 100) + 1
+			rollcount++
+		}
+		pos[0] = ((pos[0] - 1 + x) % 10) + 1
+		score[0] += pos[0]
+		if score[0] >= 1000 {
+			fmt.Println(score[1], rollcount)
+			return score[1] * rollcount
+		}
+		// p2 roll 3x
+		x = 0
+		for i := 0; i < 3; i++ {
+			x += die
+			die = (die % 100) + 1
+			rollcount++
+		}
+		pos[1] = ((pos[1] - 1 + x) % 10) + 1
+		score[1] += pos[1]
+		if score[1] >= 1000 {
+			fmt.Println(score[0], rollcount)
+			return score[0] * rollcount
+		}
+	}
+	return 0
+}
+
+func Day22(part2 bool) int {
+	return 0
+}
+
+func Day23(part2 bool) int {
+	return 0
+}
+
+func Day24x(part2 bool) int {
+	buf := Readstring(`inp w
+add z w
+mod z 2
+div w 2
+add y w
+mod y 2
+div w 2
+add x w
+mod x 2
+div w 2
+mod w 2`)
+	buf = Readfile("day24.txt")
+	text := [][]string{}
+	blocks := [][2]int{}
+	start, end := 0, -1
+	for i, s := range buf {
+		s := strings.Fields(s)
+		if s[0] == "inp" {
+			end = i
+			if end > 0 {
+				blocks = append(blocks, [2]int{start, end})
+			}
+			start = i
+		}
+		text = append(text, s)
+	}
+	blocks = append(blocks, [2]int{start, len(buf)})
+	// reg := [4]int{}
+	memo := map[string][4]int{}
+	runblock := func(input byte, n int, reg [4]int) [4]int {
+		argreg := func(s string) uint8 {
+			return s[0] - byte('w')
+		}
+		arg := func(s string) int {
+			n, err := strconv.Atoi(s)
+			if err != nil {
+				n = reg[argreg(s)]
+			}
+			return n
+		}
+		start := blocks[n][0]
+		end := blocks[n][1]
+		for _, s := range text[start:end] {
+			switch s[0] {
+			case "inp":
+				x := argreg(s[1])
+				reg[x] = int(input - byte('0'))
+			case "add":
+				x, y := argreg(s[1]), arg(s[2])
+				reg[x] += y
+			case "mul":
+				x, y := argreg(s[1]), arg(s[2])
+				reg[x] *= y
+			case "div":
+				x, y := argreg(s[1]), arg(s[2])
+				reg[x] /= y
+			case "mod":
+				x, y := argreg(s[1]), arg(s[2])
+				reg[x] %= y
+			case "eql":
+				x, y := argreg(s[1]), arg(s[2])
+				if reg[x] == y {
+					reg[x] = 1
+				} else {
+					reg[x] = 0
+				}
+			default:
+				fmt.Println("error:", s[0])
+			}
+		}
+		return reg
+	}
+	var monad func([]byte) [4]int
+	monad = func(input []byte) [4]int {
+		inputp := len(input) - 1
+		reg, ok := memo[string(input[:inputp])]
+		if !ok {
+			if inputp > 1 {
+				reg = monad(input[:inputp])
+			} else {
+				reg = runblock(input[0], 0, reg)
+			}
+			memo[string(input[:inputp])] = reg
+		}
+		reg = runblock(input[inputp], inputp, reg)
+		return reg
+	}
+	var decr func([]byte, int) []byte
+	decr = func(s []byte, p int) []byte {
+		n := int(s[p]-byte('0')) - 1
+		if n == 0 {
+			n = 9
+			if p > 0 {
+				decr(s, p-1)
+			}
+		}
+		s[p] = byte(n) + byte('0')
+		return s
+	}
+	/* parallel listing
+	for i := 0; i < blocks[0][1]; i++ {
+		for j := range blocks {
+			fmt.Printf("%10s", buf[blocks[j][0]+i])
+		}
+		println()
+	}
+	return 0
+	*/
+	// exhaustive search
+	input := []byte("11119227949959")
+	reps := 0
+	for {
+		r := monad(input)
+		if r[3] == 0 {
+			fmt.Println("found", input, r)
+			break
+		}
+		input = decr(input, 13)
+		reps++
+		if reps%1000 == 0 {
+			print(string(input), "\r")
+			// fmt.Println(memo)
+			// break
+		}
+	}
+	return 0
+}
+
+func Day24(part2 bool) int {
+	zmod := []int{14, 14, 14, 12, 15, -12, -12, 12, -7, 13, -8, -5, -10, -7}
+	zdiv := []int{1, 1, 1, 1, 1, 26, 26, 1, 26, 1, 26, 26, 26, 26}
+	wadd := []int{14, 2, 1, 13, 5, 5, 5, 9, 3, 13, 2, 1, 11, 8}
+	runone := func(input byte, step int, z int) int {
+		w := int(input - byte('0'))
+		if w != (z%26)+zmod[step] {
+			z = z / zdiv[step]
+			z = z*26 + (w + wadd[step])
+		} else {
+			z = z / zdiv[step]
+		}
+		println("z after step", step, z, z%26)
+		return z
+	}
+	monad := func(input []byte) int {
+		z := 0
+		for i := 0; i < 14; i++ {
+			w := int(input[i] - byte('0'))
+			if w != (z%26)+zmod[i] {
+				z = z / zdiv[i]
+				z = z*26 + (w + wadd[i])
+			} else {
+				z = z / zdiv[i]
+			}
+		}
+		return z
+	}
+	// work backwards
+	// for step := 13; step >= 0; step-- {
+	step := 12
+	for i := 1; i < 10; i++ {
+		for z := 0; z < 26; z++ {
+			res := runone('0'+byte(i), step, 10220+z)
+			fmt.Printf("step %d: i %d z %d -> %d %d ", step, i, 10220+z, res, res%26)
+		}
+	}
+	// }
+
+	// z 0, 15, 393, ... 6909090 after step4
+	z := 0
+	z = runone('1', 0, z)
+	z = runone('1', 1, z)
+	z = runone('1', 2, z)
+	z = runone('1', 3, z)
+	z = runone('9', 4, z)
+	z = runone('2', 5, z) // z 13-21
+	z = runone('2', 6, z) // z 13-21
+	z = runone('7', 7, z) // i 1-7 z 0
+	z = runone('9', 8, z) // z 8-16
+	z = runone('4', 9, z) // z must be 0
+	z = runone('9', 10, z)
+	z = runone('1', 11, z)
+	z = runone('5', 12, z)
+	z = runone('9', 13, z)
+	println(z)
+	input := []byte("11119227949959")
+	println(monad(input))
+	return 0
+	reps := 1
+	for {
+		print(string(input), "\r")
+		if monad(input) == 0 {
+			fmt.Println("found", input)
+			break
+		}
+		reps--
+		if reps == 0 {
+			println()
+			break
+		}
+	}
+	return 0
+}
+
+func Day25(part2 bool) int {
 	return 0
 }
